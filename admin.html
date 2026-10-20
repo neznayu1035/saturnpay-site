@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex, nofollow">
+<title>Yönetim Paneli — Saturn-Pay</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#06070A; --card:#12151C; --card-2:#181C25; --field:#14171F;
+    --line:#262B35; --line-soft:rgba(255,255,255,0.06);
+    --text:#EDEBE4; --text-dim:#8B93A4; --text-faint:#565E6E;
+    --gold:#D4AF37; --gold-bright:#F0CB6A; --gold-dim:#8C7222; --amber:#C98A4B;
+    --good:#7FAE8C; --bad:#C97757;
+  }
+  *{margin:0;padding:0;box-sizing:border-box;}
+  html{-webkit-font-smoothing:antialiased;}
+  body{ background:var(--bg); color:var(--text); font-family:'Inter',sans-serif; min-height:100vh; padding-bottom:40px; }
+  a{ color:inherit; text-decoration:none; }
+  .wrap{ max-width:880px; margin:0 auto; padding:0 18px; }
+
+  .top{ display:flex; align-items:center; justify-content:space-between; padding:20px 0 6px; }
+  .top h1{ font-size:20px; font-weight:600; }
+  .top .sub{ font-size:12px; color:var(--text-dim); margin-top:3px; }
+  .btn-sm{ font-size:12.5px; color:var(--gold-bright); border:1px solid var(--gold-dim); border-radius:999px; padding:7px 14px;
+    background:transparent; cursor:pointer; font-family:'Inter',sans-serif; }
+
+  .banner{ margin:14px 0; padding:11px 14px; border:1px dashed var(--gold-dim); border-radius:10px;
+    font-size:12.5px; line-height:1.5; color:var(--gold-bright); background:rgba(212,175,55,0.06); }
+  .banner.err{ border-color:var(--bad); color:var(--bad); background:rgba(201,119,87,0.08); }
+
+  .grid{ display:grid; grid-template-columns:repeat(2,1fr); gap:12px; margin:14px 0; }
+  @media (min-width:720px){ .grid{ grid-template-columns:repeat(4,1fr); } }
+  .stat{ background:linear-gradient(175deg,var(--card-2),var(--card)); border:1px solid var(--line-soft); border-radius:14px; padding:15px 16px; }
+  .stat .l{ font-size:11.5px; color:var(--text-dim); margin-bottom:7px; }
+  .stat .n{ font-family:'IBM Plex Mono',monospace; font-size:20px; color:var(--text); }
+  .stat .n.gold{ color:var(--gold-bright); }
+  .stat .s{ font-size:11px; color:var(--text-faint); margin-top:5px; }
+
+  .panel{ background:linear-gradient(175deg,var(--card-2),var(--card)); border:1px solid var(--line-soft); border-radius:14px; padding:18px; margin-bottom:14px; }
+  .panel h2{ font-size:14.5px; font-weight:600; margin-bottom:4px; }
+  .panel .desc{ font-size:12px; color:var(--text-dim); margin-bottom:16px; line-height:1.5; }
+
+  .split{ height:12px; border-radius:999px; overflow:hidden; background:var(--line); display:flex; margin:6px 0 10px; }
+  .split i{ display:block; height:100%; }
+  .split .a{ background:var(--gold-bright); } .split .b{ background:var(--gold-dim); }
+  .legend{ display:flex; gap:18px; font-size:12px; color:var(--text-dim); flex-wrap:wrap; }
+  .legend b{ font-family:'IBM Plex Mono',monospace; font-weight:500; color:var(--text); }
+  .dot{ display:inline-block; width:9px; height:9px; border-radius:50%; margin-right:6px; }
+
+  .bars{ display:flex; align-items:flex-end; gap:5px; height:130px; }
+  .bar-col{ flex:1; display:flex; flex-direction:column; align-items:center; justify-content:flex-end; height:100%; min-width:0; }
+  .bar-col .bar{ width:100%; max-width:26px; background:linear-gradient(180deg,var(--gold-bright),var(--gold-dim)); border-radius:4px 4px 0 0; min-height:2px; }
+  .bar-col .bar.zero{ background:var(--line); }
+  .bar-col .d{ font-size:9.5px; color:var(--text-faint); margin-top:6px; font-family:'IBM Plex Mono',monospace; }
+  .bars-foot{ display:flex; justify-content:space-between; font-size:12px; color:var(--text-dim); margin-top:14px; flex-wrap:wrap; gap:8px; }
+  .bars-foot b{ font-family:'IBM Plex Mono',monospace; font-weight:500; color:var(--text); }
+
+  .tabs{ display:flex; gap:8px; margin-bottom:12px; flex-wrap:wrap; }
+  .tab{ padding:6px 13px; border-radius:999px; border:1px solid var(--line); background:var(--field); color:var(--text-dim);
+    font-size:12px; cursor:pointer; font-family:'Inter',sans-serif; }
+  .tab.active{ border-color:var(--gold-dim); color:var(--gold-bright); background:rgba(212,175,55,0.08); }
+
+  .row{ display:flex; align-items:center; justify-content:space-between; gap:12px; padding:12px 0; border-top:1px solid var(--line-soft); }
+  .row:first-child{ border-top:none; }
+  .row .who{ min-width:0; }
+  .row .em{ font-size:13.5px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .row .meta{ font-size:11.5px; color:var(--text-faint); margin-top:3px; font-family:'IBM Plex Mono',monospace; }
+  .row .amt{ text-align:right; flex-shrink:0; font-family:'IBM Plex Mono',monospace; font-size:13px; }
+  .row .amt small{ display:block; font-size:11px; color:var(--text-faint); margin-top:3px; }
+  @media (max-width:520px){
+    .row{ flex-direction:column; align-items:stretch; gap:6px; }
+    .row .amt{ text-align:left; display:flex; align-items:baseline; gap:10px; flex-wrap:wrap; }
+    .row .amt small{ display:inline; margin:0; }
+  }
+  .empty{ color:var(--text-dim); font-size:13px; text-align:center; padding:22px 0; }
+  .more{ display:block; width:100%; margin-top:10px; padding:10px; border:1px solid var(--line); border-radius:9px; background:transparent;
+    color:var(--text-dim); font-size:12.5px; cursor:pointer; font-family:'Inter',sans-serif; }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="top">
+    <div>
+      <h1>Yönetim Paneli</h1>
+      <div class="sub" id="updated">—</div>
+    </div>
+    <button class="btn-sm" id="refreshBtn">Yenile</button>
+  </div>
+
+  <div class="banner" id="banner" style="display:none;"></div>
+
+  <div class="grid">
+    <div class="stat"><div class="l">Toplam para</div><div class="n gold" id="sTotal">—</div><div class="s">yatırımda + boşta</div></div>
+    <div class="stat"><div class="l">Yatırımdaki para</div><div class="n" id="sInvested">—</div><div class="s" id="sInvestedSub"></div></div>
+    <div class="stat"><div class="l">Bakiyede boşta duran</div><div class="n" id="sIdle">—</div><div class="s" id="sIdleSub"></div></div>
+    <div class="stat"><div class="l">Kullanıcı sayısı</div><div class="n" id="sUsers">—</div><div class="s" id="sUsersSub"></div></div>
+  </div>
+
+  <div class="panel">
+    <h2>Paranın dağılımı</h2>
+    <div class="desc">Toplam paranın ne kadarı yatırımda, ne kadarı bakiyede bekliyor.</div>
+    <div class="split"><i class="a" id="splitA"></i><i class="b" id="splitB"></i></div>
+    <div class="legend">
+      <span><span class="dot" style="background:var(--gold-bright)"></span>Yatırımda <b id="lgA">—</b></span>
+      <span><span class="dot" style="background:var(--gold-dim)"></span>Boşta <b id="lgB">—</b></span>
+    </div>
+  </div>
+
+  <div class="panel">
+    <h2>Önümüzdeki 14 gün: ödenecek tutar</h2>
+    <div class="desc">Süresi dolacak yatırımlar için kullanıcılara ödemen gereken anapara + kâr, günlere göre. Bu günlerde hesabında bu kadar para hazır olmalı.</div>
+    <div class="bars" id="bars"></div>
+    <div class="bars-foot">
+      <span>7 gün içinde: <b id="due7">—</b></span>
+      <span>14 gün içinde: <b id="due14">—</b></span>
+      <span>Tüm aktif planlar: <b id="dueAll">—</b></span>
+    </div>
+  </div>
+
+  <div class="panel">
+    <h2>Yaklaşan bitişler</h2>
+    <div class="desc">Süresi en yakın dolacak yatırımlar.</div>
+    <div id="dueList"></div>
+    <button class="more" id="moreDue" style="display:none;">Daha fazla göster</button>
+  </div>
+
+  <div class="panel">
+    <h2>Kullanıcılar</h2>
+    <div class="tabs" id="userTabs">
+      <button class="tab active" data-sort="active">Son aktif</button>
+      <button class="tab" data-sort="activeAsc">En eski girişten yeniye</button>
+      <button class="tab" data-sort="invested">En çok yatırım</button>
+      <button class="tab" data-sort="balance">En çok bakiye</button>
+      <button class="tab" data-sort="new">Yeni kayıt</button>
+    </div>
+    <div id="userList"></div>
+    <button class="more" id="moreUsers" style="display:none;">Daha fazla göster</button>
+  </div>
+
+</div>
+
+<script>
+  // ───────────────────────────────────────────────────────────────
+  // AYAR: Sunucu hazır olunca buraya auth backend adresini yazın,
+  // örnek: 'https://saturn-pay-backend-production.up.railway.app/api'
+  // Boş bırakılırsa panel ÖRNEK VERİ gösterir (gerçek kullanıcı yok).
+  // ───────────────────────────────────────────────────────────────
+  const API_BASE = '';
+
+  // Sunucunun GET {API_BASE}/admin/stats yanıtı şu biçimde olmalı
+  // (sadece yönetici e-postasına verilir, aksi halde 401/403 döner):
+  // {
+  //   "users": [{ "id", "email", "createdAt", "lastLoginAt", "balance", "txCount" }],
+  //   "investments": [{ "userEmail", "planName", "amount", "profit", "startTs", "endTs", "settled" }]
+  // }
+  // balance = bakiyede boşta duran para (yatırıma giden tutar zaten düşülmüş olmalı).
+  // createdAt / lastLoginAt ISO tarih, startTs / endTs milisaniye.
+
+  const DAY = 86400000;
+  const fmtUSD = n => new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 2 }).format(n || 0);
+  const esc = s => String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+
+  function ago(ms) {
+    const s = Math.max(0, Math.floor((Date.now() - ms) / 1000));
+    if (s < 60) return 'az önce';
+    if (s < 3600) return Math.floor(s / 60) + ' dk önce';
+    if (s < 86400) return Math.floor(s / 3600) + ' sa önce';
+    return Math.floor(s / 86400) + ' gün önce';
+  }
+  function until(ms) {
+    const s = Math.floor((ms - Date.now()) / 1000);
+    if (s <= 0) return 'süresi doldu';
+    const d = Math.floor(s / 86400), h = Math.floor((s % 86400) / 3600), m = Math.floor((s % 3600) / 60);
+    if (d > 0) return `${d} gün ${h} sa`;
+    if (h > 0) return `${h} sa ${m} dk`;
+    return `${m} dk`;
+  }
+  const dShort = ms => new Date(ms).toLocaleDateString('tr-TR', { day: '2-digit', month: 'short' });
+  const dFull = ms => new Date(ms).toLocaleString('tr-TR', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' });
+
+  // ── Örnek veri (gerçek değil) ──────────────────────────────────
+  function sampleData() {
+    let seed = 7;
+    const rnd = () => { seed = (seed * 16807) % 2147483647; return seed / 2147483647; };
+    const plans = [{ n: 'Starter', d: 7, r: 0.8 }, { n: 'Silver', d: 14, r: 1.0 }, { n: 'Gold', d: 30, r: 1.2 }];
+    const users = [], investments = [];
+    for (let i = 1; i <= 24; i++) {
+      const email = `ornek${String(i).padStart(2, '0')}@example.com`;
+      const created = Date.now() - Math.floor(rnd() * 40) * DAY;
+      const last = Date.now() - Math.floor(rnd() * rnd() * 20 * DAY);
+      users.push({ id: 'u' + i, email, createdAt: new Date(created).toISOString(), lastLoginAt: new Date(Math.max(last, created)).toISOString(),
+        balance: Math.round(rnd() * 600 * 100) / 100, txCount: 1 + Math.floor(rnd() * 14) });
+      const k = Math.floor(rnd() * 3);
+      for (let j = 0; j < k; j++) {
+        const p = plans[Math.floor(rnd() * 3)];
+        const amount = Math.round((20 + rnd() * 900) / 10) * 10;
+        const start = Date.now() - Math.floor(rnd() * p.d) * DAY - Math.floor(rnd() * DAY);
+        investments.push({ userEmail: email, planName: p.n, amount, profit: Math.round(amount * p.r / 100 * p.d * 100) / 100,
+          startTs: start, endTs: start + p.d * DAY, settled: false });
+      }
+    }
+    return { users, investments };
+  }
+
+  async function loadData() {
+    const banner = document.getElementById('banner');
+    if (!API_BASE) {
+      banner.className = 'banner'; banner.style.display = 'block';
+      banner.textContent = 'ÖRNEK VERİ: Bu rakamlar uydurmadır. Sunucu bağlanınca (API_BASE) gerçek kullanıcılar burada görünür.';
+      return sampleData();
+    }
+    const token = localStorage.getItem('saturnpay_token');
+    if (!token) { window.location.href = 'login.html'; return null; }
+    try {
+      const res = await fetch(`${API_BASE}/admin/stats`, { headers: { 'Authorization': 'Bearer ' + token } });
+      if (res.status === 401 || res.status === 403) throw new Error('Bu sayfayı görme yetkiniz yok. Yönetici e-postasıyla giriş yapın.');
+      if (!res.ok) throw new Error('Sunucu hatası (' + res.status + ').');
+      banner.style.display = 'none';
+      return await res.json();
+    } catch (e) {
+      banner.className = 'banner err'; banner.style.display = 'block';
+      banner.textContent = e.message || 'Sunucuya bağlanılamadı.';
+      return null;
+    }
+  }
+
+  // ── Hesaplama ───────────────────────────────────────────────────
+  let DATA = null, sortKey = 'active', dueShown = 8, usersShown = 8;
+
+  function compute() {
+    const users = DATA.users || [];
+    const active = (DATA.investments || []).filter(i => !i.settled);
+    const invested = active.reduce((s, i) => s + i.amount, 0);
+    const idle = users.reduce((s, u) => s + (u.balance || 0), 0);
+    const investedBy = {};
+    active.forEach(i => { investedBy[i.userEmail] = (investedBy[i.userEmail] || 0) + i.amount; });
+    return { users, active, invested, idle, total: invested + idle, investedBy };
+  }
+
+  function render() {
+    const c = compute();
+    const now = Date.now();
+    document.getElementById('updated').textContent = 'Güncelleme: ' + new Date().toLocaleString('tr-TR');
+
+    document.getElementById('sTotal').textContent = fmtUSD(c.total);
+    document.getElementById('sInvested').textContent = fmtUSD(c.invested);
+    document.getElementById('sInvestedSub').textContent = `${c.active.length} aktif plan`;
+    document.getElementById('sIdle').textContent = fmtUSD(c.idle);
+    const idlePct = c.total > 0 ? Math.round(c.idle / c.total * 100) : 0;
+    document.getElementById('sIdleSub').textContent = `toplamın %${idlePct}'i`;
+    document.getElementById('sUsers').textContent = c.users.length;
+    const new7 = c.users.filter(u => now - new Date(u.createdAt).getTime() < 7 * DAY).length;
+    const act24 = c.users.filter(u => u.lastLoginAt && now - new Date(u.lastLoginAt).getTime() < DAY).length;
+    document.getElementById('sUsersSub').textContent = `son 7 günde +${new7} · 24 saatte ${act24} aktif`;
+
+    const pa = c.total > 0 ? c.invested / c.total * 100 : 0;
+    document.getElementById('splitA').style.width = pa + '%';
+    document.getElementById('splitB').style.width = (c.total > 0 ? 100 - pa : 0) + '%';
+    document.getElementById('lgA').textContent = fmtUSD(c.invested);
+    document.getElementById('lgB').textContent = fmtUSD(c.idle);
+
+    // 14 günlük ödeme grafiği
+    const buckets = new Array(14).fill(0);
+    let due7 = 0, due14 = 0, dueAll = 0;
+    c.active.forEach(i => {
+      const pay = i.amount + i.profit;
+      dueAll += pay;
+      const diff = i.endTs - now;
+      const idx = Math.max(0, Math.floor(diff / DAY));
+      if (idx < 14) { buckets[idx] += pay; due14 += pay; }
+      if (idx < 7) due7 += pay;
+    });
+    const max = Math.max(...buckets, 1);
+    document.getElementById('bars').innerHTML = buckets.map((v, i) => `
+      <div class="bar-col" title="${esc(dShort(now + i * DAY))}: ${esc(fmtUSD(v))}">
+        <div class="bar ${v === 0 ? 'zero' : ''}" style="height:${v === 0 ? 2 : Math.max(4, v / max * 100)}%"></div>
+        <div class="d">${new Date(now + i * DAY).getDate()}</div>
+      </div>`).join('');
+    document.getElementById('due7').textContent = fmtUSD(due7);
+    document.getElementById('due14').textContent = fmtUSD(due14);
+    document.getElementById('dueAll').textContent = fmtUSD(dueAll);
+
+    // yaklaşan bitişler
+    const sorted = [...c.active].sort((a, b) => a.endTs - b.endTs);
+    const dueEl = document.getElementById('dueList');
+    dueEl.innerHTML = sorted.length === 0 ? '<div class="empty">Aktif yatırım yok.</div>' :
+      sorted.slice(0, dueShown).map(i => `
+        <div class="row">
+          <div class="who"><div class="em">${esc(i.userEmail)}</div>
+            <div class="meta">${esc(i.planName)} · ${esc(dFull(i.endTs))}</div></div>
+          <div class="amt">${fmtUSD(i.amount + i.profit)}<small>${esc(until(i.endTs))}</small></div>
+        </div>`).join('');
+    document.getElementById('moreDue').style.display = sorted.length > dueShown ? 'block' : 'none';
+
+    // kullanıcılar
+    const list = [...c.users];
+    const lastMs = u => u.lastLoginAt ? new Date(u.lastLoginAt).getTime() : 0;
+    if (sortKey === 'active') list.sort((a, b) => lastMs(b) - lastMs(a));
+    else if (sortKey === 'activeAsc') list.sort((a, b) => lastMs(a) - lastMs(b));
+    else if (sortKey === 'invested') list.sort((a, b) => (c.investedBy[b.email] || 0) - (c.investedBy[a.email] || 0));
+    else if (sortKey === 'balance') list.sort((a, b) => (b.balance || 0) - (a.balance || 0));
+    else list.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+    const uEl = document.getElementById('userList');
+    uEl.innerHTML = list.length === 0 ? '<div class="empty">Henüz kullanıcı yok.</div>' :
+      list.slice(0, usersShown).map(u => {
+        const inv = c.investedBy[u.email] || 0;
+        return `<div class="row">
+          <div class="who"><div class="em">${esc(u.email)}</div>
+            <div class="meta">${u.lastLoginAt ? 'aktif: ' + esc(ago(lastMs(u))) : 'hiç giriş yok'} · ${u.txCount || 0} işlem</div></div>
+          <div class="amt">${fmtUSD((u.balance || 0) + inv)}<small>yatırım ${esc(fmtUSD(inv))} · boşta ${esc(fmtUSD(u.balance))}</small></div>
+        </div>`;
+      }).join('');
+    document.getElementById('moreUsers').style.display = list.length > usersShown ? 'block' : 'none';
+  }
+
+  document.getElementById('userTabs').addEventListener('click', e => {
+    const b = e.target.closest('.tab'); if (!b) return;
+    document.querySelectorAll('#userTabs .tab').forEach(t => t.classList.remove('active'));
+    b.classList.add('active'); sortKey = b.dataset.sort; usersShown = 8; render();
+  });
+  document.getElementById('moreDue').addEventListener('click', () => { dueShown += 10; render(); });
+  document.getElementById('moreUsers').addEventListener('click', () => { usersShown += 10; render(); });
+  document.getElementById('refreshBtn').addEventListener('click', async () => { const d = await loadData(); if (d) { DATA = d; render(); } });
+
+  (async () => { const d = await loadData(); if (d) { DATA = d; render(); } })();
+</script>
+</body>
+</html>
