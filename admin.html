@@ -59,6 +59,17 @@
   .bars-foot{ display:flex; justify-content:space-between; font-size:12px; color:var(--text-dim); margin-top:14px; flex-wrap:wrap; gap:8px; }
   .bars-foot b{ font-family:'IBM Plex Mono',monospace; font-weight:500; color:var(--text); }
 
+  .recon-row{ display:flex; justify-content:space-between; align-items:baseline; padding:9px 0; border-top:1px solid var(--line-soft); font-size:13px; color:var(--text-dim); gap:10px; }
+  .recon-row:first-of-type{ border-top:none; }
+  .recon-row b{ font-family:'IBM Plex Mono',monospace; font-weight:500; color:var(--text); white-space:nowrap; }
+  .recon-row.total{ color:var(--text); }
+  .status{ display:flex; align-items:center; gap:10px; margin-top:14px; padding:12px 14px; border-radius:10px; font-size:13px; line-height:1.45; }
+  .status.ok{ background:rgba(127,174,140,0.10); border:1px solid rgba(127,174,140,0.35); color:var(--good); }
+  .status.warn{ background:rgba(212,175,55,0.08); border:1px solid var(--gold-dim); color:var(--gold-bright); }
+  .status.bad{ background:rgba(201,119,87,0.10); border:1px solid rgba(201,119,87,0.45); color:var(--bad); }
+  .cov{ height:8px; border-radius:999px; background:var(--line); overflow:hidden; margin:12px 0 4px; }
+  .cov i{ display:block; height:100%; background:var(--good); }
+  .cov.warn i{ background:var(--gold-bright); } .cov.bad i{ background:var(--bad); }
   .tabs{ display:flex; gap:8px; margin-bottom:12px; flex-wrap:wrap; }
   .tab{ padding:6px 13px; border-radius:999px; border:1px solid var(--line); background:var(--field); color:var(--text-dim);
     font-size:12px; cursor:pointer; font-family:'Inter',sans-serif; }
@@ -99,6 +110,20 @@
     <div class="stat"><div class="l">Yatırımdaki para</div><div class="n" id="sInvested">—</div><div class="s" id="sInvestedSub"></div></div>
     <div class="stat"><div class="l">Bakiyede boşta duran</div><div class="n" id="sIdle">—</div><div class="s" id="sIdleSub"></div></div>
     <div class="stat"><div class="l">Kullanıcı sayısı</div><div class="n" id="sUsers">—</div><div class="s" id="sUsersSub"></div></div>
+  </div>
+
+
+  <div class="panel">
+    <h2>Uyum kontrolü: Bybit'teki para yetiyor mu?</h2>
+    <div class="desc">Sitedeki bakiyeler senin kullanıcılara borcundur. Bybit'te gerçekte duran para bu borcu karşılamalı. Alt hesaptan para çekersen veya toplarsan sitedeki bakiye kendiliğinden azalmaz.</div>
+    <div class="recon-row"><span>Kullanıcı bakiyeleri (boşta)</span><b id="rIdle">—</b></div>
+    <div class="recon-row"><span>Yatırımdaki anapara</span><b id="rPrincipal">—</b></div>
+    <div class="recon-row total"><span>Anapara + bakiye borcu</span><b id="rLiab">—</b></div>
+    <div class="recon-row"><span>Aktif planlar için ödenecek kâr</span><b id="rProfit">—</b></div>
+    <div class="recon-row total"><span>Toplam yükümlülük (kâr dahil)</span><b id="rObl">—</b></div>
+    <div class="recon-row"><span>Bybit'teki gerçek bakiye (ana + alt hesaplar)</span><b id="rEx">—</b></div>
+    <div class="cov" id="cov"><i id="covBar" style="width:0"></i></div>
+    <div class="status" id="reconStatus"></div>
   </div>
 
   <div class="panel">
@@ -156,7 +181,8 @@
   // (sadece yönetici e-postasına verilir, aksi halde 401/403 döner):
   // {
   //   "users": [{ "id", "email", "createdAt", "lastLoginAt", "balance", "txCount" }],
-  //   "investments": [{ "userEmail", "planName", "amount", "profit", "startTs", "endTs", "settled" }]
+  //   "investments": [{ "userEmail", "planName", "amount", "profit", "startTs", "endTs", "settled" }],
+  //   "exchange": { "totalUsdt": 12345.67 }   // Bybit ana hesap + alt hesaplardaki gerçek toplam USDT
   // }
   // balance = bakiyede boşta duran para (yatırıma giden tutar zaten düşülmüş olmalı).
   // createdAt / lastLoginAt ISO tarih, startTs / endTs milisaniye.
@@ -204,7 +230,10 @@
           startTs: start, endTs: start + p.d * DAY, settled: false });
       }
     }
-    return { users, investments };
+    const act = investments.filter(i => !i.settled);
+    const principal = act.reduce((a, i) => a + i.amount, 0), idle = users.reduce((a, u) => a + u.balance, 0);
+    const profit = act.reduce((a, i) => a + i.profit, 0);
+    return { users, investments, exchange: { totalUsdt: Math.round((principal + idle + profit * 0.35) * 100) / 100 } };
   }
 
   async function loadData() {
@@ -239,7 +268,8 @@
     const idle = users.reduce((s, u) => s + (u.balance || 0), 0);
     const investedBy = {};
     active.forEach(i => { investedBy[i.userEmail] = (investedBy[i.userEmail] || 0) + i.amount; });
-    return { users, active, invested, idle, total: invested + idle, investedBy };
+    const profitOwed = active.reduce((s, i) => s + (i.profit || 0), 0);
+    return { users, active, invested, idle, total: invested + idle, investedBy, profitOwed };
   }
 
   function render() {
@@ -263,6 +293,35 @@
     document.getElementById('splitB').style.width = (c.total > 0 ? 100 - pa : 0) + '%';
     document.getElementById('lgA').textContent = fmtUSD(c.invested);
     document.getElementById('lgB').textContent = fmtUSD(c.idle);
+
+    // uyum kontrolü
+    const liab = c.total, obl = c.total + c.profitOwed;
+    document.getElementById('rIdle').textContent = fmtUSD(c.idle);
+    document.getElementById('rPrincipal').textContent = fmtUSD(c.invested);
+    document.getElementById('rLiab').textContent = fmtUSD(liab);
+    document.getElementById('rProfit').textContent = fmtUSD(c.profitOwed);
+    document.getElementById('rObl').textContent = fmtUSD(obl);
+    const exch = DATA.exchange && typeof DATA.exchange.totalUsdt === 'number' ? DATA.exchange.totalUsdt : null;
+    const st = document.getElementById('reconStatus'), cov = document.getElementById('cov'), bar = document.getElementById('covBar');
+    if (exch === null) {
+      document.getElementById('rEx').textContent = '—';
+      bar.style.width = '0'; cov.className = 'cov';
+      st.className = 'status warn'; st.textContent = 'Bybit bakiyesi sunucudan gelmedi, karşılaştırma yapılamıyor.';
+    } else {
+      document.getElementById('rEx').textContent = fmtUSD(exch);
+      const pct = obl > 0 ? exch / obl * 100 : 100;
+      bar.style.width = Math.min(100, pct) + '%';
+      if (exch < liab) {
+        cov.className = 'cov bad'; st.className = 'status bad';
+        st.textContent = `Dikkat: Bybit'te ${fmtUSD(liab - exch)} eksik. Kullanıcıların bakiyesini ve yatırdıkları parayı bile tam karşılayamıyorsun.`;
+      } else if (exch < obl) {
+        cov.className = 'cov warn'; st.className = 'status warn';
+        st.textContent = `Anapara ve bakiyeler karşılanıyor, ama planlar bitince ödenecek kârın ${fmtUSD(obl - exch)} kadarı için ek para gerekecek (karşılama %${Math.round(pct)}).`;
+      } else {
+        cov.className = 'cov'; st.className = 'status ok';
+        st.textContent = `Yeterli: Bybit'te borcun tamamından ${fmtUSD(exch - obl)} fazla var.`;
+      }
+    }
 
     // 14 günlük ödeme grafiği
     const buckets = new Array(14).fill(0);
