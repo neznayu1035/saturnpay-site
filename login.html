@@ -197,7 +197,7 @@
     color:var(--text-dim);
     margin-bottom:9px;
   }
-  input[type="email"], input[type="text"]{
+  input[type="email"], input[type="text"], input[type="password"]{
     width:100%;
     background:var(--field);
     border:1px solid var(--line);
@@ -332,6 +332,16 @@
     .saturn-hero{ width:104px; height:104px; margin-bottom:2px; }
     .auth-card{ padding:32px 24px; border-radius:14px; }
   }
+
+  .pw-wrap{ position:relative; }
+  .pw-wrap input{ padding-right:70px; }
+  .pw-toggle{ position:absolute; right:12px; top:12px; background:none; border:none; color:var(--text-dim);
+    font-size:12px; cursor:pointer; font-family:'Inter',sans-serif; padding:4px 6px; }
+  .pw-toggle:hover{ color:var(--gold-bright); }
+  .hint-small{ font-size:11.5px; color:var(--text-faint); margin:-10px 0 16px; line-height:1.45; }
+  .link-row{ text-align:center; margin:-8px 0 20px; }
+  .link-btn{ background:none; border:none; color:var(--gold-bright); cursor:pointer; font-family:'Inter',sans-serif; font-size:13px; text-decoration:underline; text-underline-offset:3px; }
+  .ok-msg{ color:var(--good); font-size:13px; margin:-6px 0 16px; display:none; line-height:1.45; }
 </style>
 </head>
 <body>
@@ -359,17 +369,36 @@
   </div>
 
   <div class="auth-card">
-    <h1 data-i18n="login_title">Log In</h1>
-    <p class="subtitle" data-i18n="login_subtitle">Enter your email to receive a code.</p>
+    <h1 id="titleEl">Log In</h1>
+    <p class="subtitle" id="subEl">Enter your email and password.</p>
 
     <form id="loginForm">
-      <label for="email" id="emailLabel" data-i18n="label_email">Email</label>
-      <input type="email" id="email" data-i18n-placeholder="placeholder_email" placeholder="you@company.com" required>
+      <label for="email" data-i18n="label_email">Email</label>
+      <input type="email" id="email" data-i18n-placeholder="placeholder_email" placeholder="you@company.com" autocomplete="email" required>
+
+      <div id="pwGroup">
+        <label for="password" data-i18n="label_password">label_password</label>
+      <div class="pw-wrap">
+        <input type="password" id="password" data-i18n-placeholder="placeholder_password" autocomplete="current-password">
+        <button type="button" class="pw-toggle" data-target="password"></button>
+      </div>
+      </div>
 
       <div id="codeGroup" style="display:none;">
         <label for="code" data-i18n="label_code">Verification Code</label>
-        <input type="text" id="code" data-i18n-placeholder="placeholder_code" placeholder="6-digit code" inputmode="numeric" maxlength="6" style="margin-bottom:18px;">
+        <input type="text" id="code" data-i18n-placeholder="placeholder_code" inputmode="numeric" maxlength="6" autocomplete="one-time-code">
       </div>
+
+      <div id="newPwGroup" style="display:none;">
+        <label for="newPassword" data-i18n="label_new_password">label_new_password</label>
+      <div class="pw-wrap">
+        <input type="password" id="newPassword" data-i18n-placeholder="placeholder_new_password" autocomplete="new-password">
+        <button type="button" class="pw-toggle" data-target="newPassword"></button>
+      </div>
+        <p class="hint-small" data-i18n="hint_password">At least 8 characters.</p>
+      </div>
+
+      <div class="link-row" id="forgotRow"><button type="button" class="link-btn" id="forgotBtn">Forgot password?</button></div>
 
       <div class="verify-box" id="verifyBox" role="status" aria-live="polite">
         <div class="verify-spinner"></div>
@@ -379,173 +408,309 @@
         </div>
       </div>
 
+      <p id="okMsg" class="ok-msg"></p>
       <p id="formError" style="color:#C97757;font-size:13px;margin:-6px 0 16px;display:none;"></p>
 
-      <button type="submit" class="btn-primary" id="submitBtn" disabled data-i18n="btn_send_code">Send Code</button>
+      <button type="submit" class="btn-primary" id="submitBtn" disabled>Log In</button>
     </form>
 
-    <div class="divider" data-i18n="divider_or">or</div>
+    <div class="link-row" id="backRow" style="display:none;margin-top:-10px;"><button type="button" class="link-btn" id="backBtn">Back to log in</button></div>
 
-    <a href="register.html" class="btn-secondary" data-i18n="btn_create_account">Create Account</a>
-    <button type="button" class="support-link" data-i18n="btn_support">💬 Support</button>
+    <div id="extras">
+      <div class="divider" data-i18n="divider_or">or</div>
+      <a href="register.html" class="btn-secondary" data-i18n="btn_create_account">Create Account</a>
+      <button type="button" class="support-link" data-i18n="btn_support">💬 Support</button>
+    </div>
   </div>
 </main>
 
 <footer data-i18n="footer_copyright">© 2026 SATURN-PAY · ALL RIGHTS RESERVED</footer>
 
 <script>
-  // ── i18n (inline dictionary, same pattern as the other pages) ──────
   const LANG_KEY = 'saturnpay_lang';
   const LOCALE_MAP = { en: 'en-US', tr: 'tr-TR', ru: 'ru-RU', es: 'es-ES', fr: 'fr-FR', de: 'de-DE' };
 
   const translations = {
-    en: {
-      login_title: 'Log In',
-      login_subtitle: 'Enter your email to receive a code.',
-      label_email: 'Email',
-      placeholder_email: 'you@company.com',
-      label_code: 'Verification Code',
-      placeholder_code: '6-digit code',
-      verifying_text: 'Verifying…',
-      verifying_sub: 'Automatic traffic check',
-      verified_text: 'Verified',
-      btn_send_code: 'Send Code',
-      btn_verify_code: 'Verify & Log In',
-      divider_or: 'or',
-      btn_create_account: 'Create Account',
-      btn_support: '💬 Support',
-      footer_copyright: '© 2026 SATURN-PAY · ALL RIGHTS RESERVED',
-      test_mode_prefix: 'Test mode — your code:',
-      err_no_account: 'No verified account found for this email.',
-      err_code_invalid: 'The code is incorrect.',
-      err_code_send_failed: 'Could not send the code. Please try again.',
-      err_code_verify_failed: 'Could not verify the code. Please try again.',
-      err_connection: 'Connection error. Please try again.',
-    },
-    tr: {
-      login_title: 'Giriş Yap',
-      login_subtitle: 'Kod almak için e-posta adresinizi girin.',
-      label_email: 'E-posta',
-      placeholder_email: 'siz@sirket.com',
-      label_code: 'Doğrulama Kodu',
-      placeholder_code: '6 haneli kod',
-      verifying_text: 'Doğrulanıyor…',
-      verifying_sub: 'Otomatik trafik kontrolü',
-      verified_text: 'Doğrulandı',
-      btn_send_code: 'Kod Gönder',
-      btn_verify_code: 'Doğrula ve Giriş Yap',
-      divider_or: 'veya',
-      btn_create_account: 'Hesap Oluştur',
-      btn_support: '💬 Destek',
-      footer_copyright: '© 2026 SATURN-PAY · TÜM HAKLARI SAKLIDIR',
-      test_mode_prefix: 'Test modu — kodunuz:',
-      err_no_account: 'Bu e-posta için doğrulanmış bir hesap bulunamadı.',
-      err_code_invalid: 'Kod hatalı.',
-      err_code_send_failed: 'Kod gönderilemedi. Lütfen tekrar deneyin.',
-      err_code_verify_failed: 'Kod doğrulanamadı. Lütfen tekrar deneyin.',
-      err_connection: 'Bağlantı hatası. Lütfen tekrar deneyin.',
-    },
-    ru: {
-      login_title: 'Вход',
-      login_subtitle: 'Введите свой email, чтобы получить код.',
-      label_email: 'Email',
-      placeholder_email: 'you@company.com',
-      label_code: 'Код подтверждения',
-      placeholder_code: '6-значный код',
-      verifying_text: 'Проверка…',
-      verifying_sub: 'Автоматическая проверка трафика',
-      verified_text: 'Проверено',
-      btn_send_code: 'Отправить код',
-      btn_verify_code: 'Подтвердить и войти',
-      divider_or: 'или',
-      btn_create_account: 'Создать аккаунт',
-      btn_support: '💬 Поддержка',
-      footer_copyright: '© 2026 SATURN-PAY · ВСЕ ПРАВА ЗАЩИЩЕНЫ',
-      test_mode_prefix: 'Тестовый режим — ваш код:',
-      err_no_account: 'Подтверждённый аккаунт с этим email не найден.',
-      err_code_invalid: 'Неверный код.',
-      err_code_send_failed: 'Не удалось отправить код. Попробуйте ещё раз.',
-      err_code_verify_failed: 'Не удалось проверить код. Попробуйте ещё раз.',
-      err_connection: 'Ошибка соединения. Попробуйте ещё раз.',
-    },
-    es: {
-      login_title: 'Iniciar sesión',
-      login_subtitle: 'Introduce tu correo para recibir un código.',
-      label_email: 'Correo electrónico',
-      placeholder_email: 'tu@empresa.com',
-      label_code: 'Código de verificación',
-      placeholder_code: 'Código de 6 dígitos',
-      verifying_text: 'Verificando…',
-      verifying_sub: 'Comprobación automática de tráfico',
-      verified_text: 'Verificado',
-      btn_send_code: 'Enviar código',
-      btn_verify_code: 'Verificar e iniciar sesión',
-      divider_or: 'o',
-      btn_create_account: 'Crear cuenta',
-      btn_support: '💬 Soporte',
-      footer_copyright: '© 2026 SATURN-PAY · TODOS LOS DERECHOS RESERVADOS',
-      test_mode_prefix: 'Modo de prueba — tu código:',
-      err_no_account: 'No se encontró una cuenta verificada para este correo.',
-      err_code_invalid: 'El código es incorrecto.',
-      err_code_send_failed: 'No se pudo enviar el código. Inténtalo de nuevo.',
-      err_code_verify_failed: 'No se pudo verificar el código. Inténtalo de nuevo.',
-      err_connection: 'Error de conexión. Inténtalo de nuevo.',
-    },
-    fr: {
-      login_title: 'Connexion',
-      login_subtitle: 'Saisissez votre e-mail pour recevoir un code.',
-      label_email: 'E-mail',
-      placeholder_email: 'vous@entreprise.com',
-      label_code: 'Code de vérification',
-      placeholder_code: 'Code à 6 chiffres',
-      verifying_text: 'Vérification…',
-      verifying_sub: 'Contrôle automatique du trafic',
-      verified_text: 'Vérifié',
-      btn_send_code: 'Envoyer le code',
-      btn_verify_code: 'Vérifier et se connecter',
-      divider_or: 'ou',
-      btn_create_account: 'Créer un compte',
-      btn_support: '💬 Assistance',
-      footer_copyright: '© 2026 SATURN-PAY · TOUS DROITS RÉSERVÉS',
-      test_mode_prefix: 'Mode test — votre code :',
-      err_no_account: 'Aucun compte vérifié trouvé pour cet e-mail.',
-      err_code_invalid: 'Le code est incorrect.',
-      err_code_send_failed: "Impossible d'envoyer le code. Veuillez réessayer.",
-      err_code_verify_failed: 'Impossible de vérifier le code. Veuillez réessayer.',
-      err_connection: 'Erreur de connexion. Veuillez réessayer.',
-    },
-    de: {
-      login_title: 'Anmelden',
-      login_subtitle: 'Gib deine E-Mail-Adresse ein, um einen Code zu erhalten.',
-      label_email: 'E-Mail',
-      placeholder_email: 'du@firma.com',
-      label_code: 'Bestätigungscode',
-      placeholder_code: '6-stelliger Code',
-      verifying_text: 'Wird überprüft…',
-      verifying_sub: 'Automatische Verkehrsprüfung',
-      verified_text: 'Überprüft',
-      btn_send_code: 'Code senden',
-      btn_verify_code: 'Bestätigen und anmelden',
-      divider_or: 'oder',
-      btn_create_account: 'Konto erstellen',
-      btn_support: '💬 Support',
-      footer_copyright: '© 2026 SATURN-PAY · ALLE RECHTE VORBEHALTEN',
-      test_mode_prefix: 'Testmodus — dein Code:',
-      err_no_account: 'Für diese E-Mail wurde kein bestätigtes Konto gefunden.',
-      err_code_invalid: 'Der Code ist falsch.',
-      err_code_send_failed: 'Der Code konnte nicht gesendet werden. Bitte versuche es erneut.',
-      err_code_verify_failed: 'Der Code konnte nicht überprüft werden. Bitte versuche es erneut.',
-      err_connection: 'Verbindungsfehler. Bitte versuche es erneut.',
-    },
-  };
+  "en": {
+    "login_title": "Log In",
+    "login_subtitle": "Enter your email to receive a code.",
+    "label_email": "Email",
+    "placeholder_email": "you@company.com",
+    "label_code": "Verification Code",
+    "placeholder_code": "6-digit code",
+    "verifying_text": "Verifying…",
+    "verifying_sub": "Automatic traffic check",
+    "verified_text": "Verified",
+    "btn_send_code": "Send Code",
+    "btn_verify_code": "Verify & Log In",
+    "divider_or": "or",
+    "btn_create_account": "Create Account",
+    "btn_support": "💬 Support",
+    "footer_copyright": "© 2026 SATURN-PAY · ALL RIGHTS RESERVED",
+    "test_mode_prefix": "Test mode — your code:",
+    "err_no_account": "No verified account found for this email.",
+    "err_code_invalid": "The code is incorrect.",
+    "err_code_send_failed": "Could not send the code. Please try again.",
+    "err_code_verify_failed": "Could not verify the code. Please try again.",
+    "err_connection": "Connection error. Please try again.",
+    "login_subtitle_pw": "Enter your email and password.",
+    "label_password": "Password",
+    "placeholder_password": "Your password",
+    "label_new_password": "New Password",
+    "placeholder_new_password": "At least 8 characters",
+    "hint_password": "At least 8 characters. Do not reuse a password from another site.",
+    "show_pw": "Show",
+    "hide_pw": "Hide",
+    "btn_login": "Log In",
+    "link_forgot": "Forgot password?",
+    "link_back": "Back to log in",
+    "reset_title": "Reset password",
+    "reset_subtitle_email": "Enter your email and we will send you a code.",
+    "reset_subtitle_code": "Enter the code from your email and choose a new password.",
+    "btn_send_reset": "Send Reset Code",
+    "btn_set_password": "Set New Password",
+    "msg_reset_sent": "If this email has an account, a code was sent.",
+    "msg_reset_done": "Password updated. Log in with your new password.",
+    "err_login_failed": "Incorrect email or password.",
+    "err_too_many": "Too many attempts. Try again in a minute.",
+    "err_password_short": "The password must be at least 8 characters.",
+    "err_password_same_email": "The password cannot be the same as your email.",
+    "err_reset_failed": "Could not update the password."
+  },
+  "tr": {
+    "login_title": "Giriş Yap",
+    "login_subtitle": "Kod almak için e-posta adresinizi girin.",
+    "label_email": "E-posta",
+    "placeholder_email": "siz@sirket.com",
+    "label_code": "Doğrulama Kodu",
+    "placeholder_code": "6 haneli kod",
+    "verifying_text": "Doğrulanıyor…",
+    "verifying_sub": "Otomatik trafik kontrolü",
+    "verified_text": "Doğrulandı",
+    "btn_send_code": "Kod Gönder",
+    "btn_verify_code": "Doğrula ve Giriş Yap",
+    "divider_or": "veya",
+    "btn_create_account": "Hesap Oluştur",
+    "btn_support": "💬 Destek",
+    "footer_copyright": "© 2026 SATURN-PAY · TÜM HAKLARI SAKLIDIR",
+    "test_mode_prefix": "Test modu — kodunuz:",
+    "err_no_account": "Bu e-posta için doğrulanmış bir hesap bulunamadı.",
+    "err_code_invalid": "Kod hatalı.",
+    "err_code_send_failed": "Kod gönderilemedi. Lütfen tekrar deneyin.",
+    "err_code_verify_failed": "Kod doğrulanamadı. Lütfen tekrar deneyin.",
+    "err_connection": "Bağlantı hatası. Lütfen tekrar deneyin.",
+    "login_subtitle_pw": "E-posta ve şifrenizi girin.",
+    "label_password": "Şifre",
+    "placeholder_password": "Şifreniz",
+    "label_new_password": "Yeni Şifre",
+    "placeholder_new_password": "En az 8 karakter",
+    "hint_password": "En az 8 karakter. Başka bir sitede kullandığınız şifreyi kullanmayın.",
+    "show_pw": "Göster",
+    "hide_pw": "Gizle",
+    "btn_login": "Giriş Yap",
+    "link_forgot": "Şifremi unuttum",
+    "link_back": "Girişe dön",
+    "reset_title": "Şifreyi sıfırla",
+    "reset_subtitle_email": "E-postanızı girin, size bir kod gönderelim.",
+    "reset_subtitle_code": "E-postanızdaki kodu girin ve yeni bir şifre belirleyin.",
+    "btn_send_reset": "Sıfırlama Kodu Gönder",
+    "btn_set_password": "Yeni Şifreyi Kaydet",
+    "msg_reset_sent": "Bu e-postaya ait bir hesap varsa kod gönderildi.",
+    "msg_reset_done": "Şifre güncellendi. Yeni şifrenizle giriş yapın.",
+    "err_login_failed": "E-posta veya şifre hatalı.",
+    "err_too_many": "Çok fazla deneme. Bir dakika sonra tekrar deneyin.",
+    "err_password_short": "Şifre en az 8 karakter olmalı.",
+    "err_password_same_email": "Şifre e-posta adresinizle aynı olamaz.",
+    "err_reset_failed": "Şifre güncellenemedi."
+  },
+  "ru": {
+    "login_title": "Вход",
+    "login_subtitle": "Введите свой email, чтобы получить код.",
+    "label_email": "Email",
+    "placeholder_email": "you@company.com",
+    "label_code": "Код подтверждения",
+    "placeholder_code": "6-значный код",
+    "verifying_text": "Проверка…",
+    "verifying_sub": "Автоматическая проверка трафика",
+    "verified_text": "Проверено",
+    "btn_send_code": "Отправить код",
+    "btn_verify_code": "Подтвердить и войти",
+    "divider_or": "или",
+    "btn_create_account": "Создать аккаунт",
+    "btn_support": "💬 Поддержка",
+    "footer_copyright": "© 2026 SATURN-PAY · ВСЕ ПРАВА ЗАЩИЩЕНЫ",
+    "test_mode_prefix": "Тестовый режим — ваш код:",
+    "err_no_account": "Подтверждённый аккаунт с этим email не найден.",
+    "err_code_invalid": "Неверный код.",
+    "err_code_send_failed": "Не удалось отправить код. Попробуйте ещё раз.",
+    "err_code_verify_failed": "Не удалось проверить код. Попробуйте ещё раз.",
+    "err_connection": "Ошибка соединения. Попробуйте ещё раз.",
+    "login_subtitle_pw": "Введите email и пароль.",
+    "label_password": "Пароль",
+    "placeholder_password": "Ваш пароль",
+    "label_new_password": "Новый пароль",
+    "placeholder_new_password": "Не менее 8 символов",
+    "hint_password": "Не менее 8 символов. Не используйте пароль с других сайтов.",
+    "show_pw": "Показать",
+    "hide_pw": "Скрыть",
+    "btn_login": "Войти",
+    "link_forgot": "Забыли пароль?",
+    "link_back": "Назад ко входу",
+    "reset_title": "Сброс пароля",
+    "reset_subtitle_email": "Введите email, и мы отправим вам код.",
+    "reset_subtitle_code": "Введите код из письма и задайте новый пароль.",
+    "btn_send_reset": "Отправить код",
+    "btn_set_password": "Сохранить новый пароль",
+    "msg_reset_sent": "Если для этого email есть аккаунт, код отправлен.",
+    "msg_reset_done": "Пароль обновлён. Войдите с новым паролем.",
+    "err_login_failed": "Неверный email или пароль.",
+    "err_too_many": "Слишком много попыток. Повторите через минуту.",
+    "err_password_short": "Пароль должен содержать не менее 8 символов.",
+    "err_password_same_email": "Пароль не может совпадать с email.",
+    "err_reset_failed": "Не удалось обновить пароль."
+  },
+  "es": {
+    "login_title": "Iniciar sesión",
+    "login_subtitle": "Introduce tu correo para recibir un código.",
+    "label_email": "Correo electrónico",
+    "placeholder_email": "tu@empresa.com",
+    "label_code": "Código de verificación",
+    "placeholder_code": "Código de 6 dígitos",
+    "verifying_text": "Verificando…",
+    "verifying_sub": "Comprobación automática de tráfico",
+    "verified_text": "Verificado",
+    "btn_send_code": "Enviar código",
+    "btn_verify_code": "Verificar e iniciar sesión",
+    "divider_or": "o",
+    "btn_create_account": "Crear cuenta",
+    "btn_support": "💬 Soporte",
+    "footer_copyright": "© 2026 SATURN-PAY · TODOS LOS DERECHOS RESERVADOS",
+    "test_mode_prefix": "Modo de prueba — tu código:",
+    "err_no_account": "No se encontró una cuenta verificada para este correo.",
+    "err_code_invalid": "El código es incorrecto.",
+    "err_code_send_failed": "No se pudo enviar el código. Inténtalo de nuevo.",
+    "err_code_verify_failed": "No se pudo verificar el código. Inténtalo de nuevo.",
+    "err_connection": "Error de conexión. Inténtalo de nuevo.",
+    "login_subtitle_pw": "Introduce tu correo y contraseña.",
+    "label_password": "Contraseña",
+    "placeholder_password": "Tu contraseña",
+    "label_new_password": "Nueva contraseña",
+    "placeholder_new_password": "Al menos 8 caracteres",
+    "hint_password": "Al menos 8 caracteres. No reutilices una contraseña de otro sitio.",
+    "show_pw": "Mostrar",
+    "hide_pw": "Ocultar",
+    "btn_login": "Iniciar sesión",
+    "link_forgot": "¿Olvidaste tu contraseña?",
+    "link_back": "Volver a iniciar sesión",
+    "reset_title": "Restablecer contraseña",
+    "reset_subtitle_email": "Introduce tu correo y te enviaremos un código.",
+    "reset_subtitle_code": "Introduce el código de tu correo y elige una nueva contraseña.",
+    "btn_send_reset": "Enviar código",
+    "btn_set_password": "Guardar nueva contraseña",
+    "msg_reset_sent": "Si este correo tiene una cuenta, se envió un código.",
+    "msg_reset_done": "Contraseña actualizada. Inicia sesión con la nueva.",
+    "err_login_failed": "Correo o contraseña incorrectos.",
+    "err_too_many": "Demasiados intentos. Inténtalo de nuevo en un minuto.",
+    "err_password_short": "La contraseña debe tener al menos 8 caracteres.",
+    "err_password_same_email": "La contraseña no puede ser igual al correo.",
+    "err_reset_failed": "No se pudo actualizar la contraseña."
+  },
+  "fr": {
+    "login_title": "Connexion",
+    "login_subtitle": "Saisissez votre e-mail pour recevoir un code.",
+    "label_email": "E-mail",
+    "placeholder_email": "vous@entreprise.com",
+    "label_code": "Code de vérification",
+    "placeholder_code": "Code à 6 chiffres",
+    "verifying_text": "Vérification…",
+    "verifying_sub": "Contrôle automatique du trafic",
+    "verified_text": "Vérifié",
+    "btn_send_code": "Envoyer le code",
+    "btn_verify_code": "Vérifier et se connecter",
+    "divider_or": "ou",
+    "btn_create_account": "Créer un compte",
+    "btn_support": "💬 Assistance",
+    "footer_copyright": "© 2026 SATURN-PAY · TOUS DROITS RÉSERVÉS",
+    "test_mode_prefix": "Mode test — votre code :",
+    "err_no_account": "Aucun compte vérifié trouvé pour cet e-mail.",
+    "err_code_invalid": "Le code est incorrect.",
+    "err_code_send_failed": "Impossible d'envoyer le code. Veuillez réessayer.",
+    "err_code_verify_failed": "Impossible de vérifier le code. Veuillez réessayer.",
+    "err_connection": "Erreur de connexion. Veuillez réessayer.",
+    "login_subtitle_pw": "Saisissez votre e-mail et votre mot de passe.",
+    "label_password": "Mot de passe",
+    "placeholder_password": "Votre mot de passe",
+    "label_new_password": "Nouveau mot de passe",
+    "placeholder_new_password": "Au moins 8 caractères",
+    "hint_password": "Au moins 8 caractères. Ne réutilisez pas un mot de passe d'un autre site.",
+    "show_pw": "Afficher",
+    "hide_pw": "Masquer",
+    "btn_login": "Se connecter",
+    "link_forgot": "Mot de passe oublié ?",
+    "link_back": "Retour à la connexion",
+    "reset_title": "Réinitialiser le mot de passe",
+    "reset_subtitle_email": "Saisissez votre e-mail et nous vous enverrons un code.",
+    "reset_subtitle_code": "Saisissez le code reçu par e-mail et choisissez un nouveau mot de passe.",
+    "btn_send_reset": "Envoyer le code",
+    "btn_set_password": "Enregistrer le nouveau mot de passe",
+    "msg_reset_sent": "Si cet e-mail a un compte, un code a été envoyé.",
+    "msg_reset_done": "Mot de passe mis à jour. Connectez-vous avec le nouveau.",
+    "err_login_failed": "E-mail ou mot de passe incorrect.",
+    "err_too_many": "Trop de tentatives. Réessayez dans une minute.",
+    "err_password_short": "Le mot de passe doit contenir au moins 8 caractères.",
+    "err_password_same_email": "Le mot de passe ne peut pas être identique à l'e-mail.",
+    "err_reset_failed": "Impossible de mettre à jour le mot de passe."
+  },
+  "de": {
+    "login_title": "Anmelden",
+    "login_subtitle": "Gib deine E-Mail-Adresse ein, um einen Code zu erhalten.",
+    "label_email": "E-Mail",
+    "placeholder_email": "du@firma.com",
+    "label_code": "Bestätigungscode",
+    "placeholder_code": "6-stelliger Code",
+    "verifying_text": "Wird überprüft…",
+    "verifying_sub": "Automatische Verkehrsprüfung",
+    "verified_text": "Überprüft",
+    "btn_send_code": "Code senden",
+    "btn_verify_code": "Bestätigen und anmelden",
+    "divider_or": "oder",
+    "btn_create_account": "Konto erstellen",
+    "btn_support": "💬 Support",
+    "footer_copyright": "© 2026 SATURN-PAY · ALLE RECHTE VORBEHALTEN",
+    "test_mode_prefix": "Testmodus — dein Code:",
+    "err_no_account": "Für diese E-Mail wurde kein bestätigtes Konto gefunden.",
+    "err_code_invalid": "Der Code ist falsch.",
+    "err_code_send_failed": "Der Code konnte nicht gesendet werden. Bitte versuche es erneut.",
+    "err_code_verify_failed": "Der Code konnte nicht überprüft werden. Bitte versuche es erneut.",
+    "err_connection": "Verbindungsfehler. Bitte versuche es erneut.",
+    "login_subtitle_pw": "Gib deine E-Mail und dein Passwort ein.",
+    "label_password": "Passwort",
+    "placeholder_password": "Dein Passwort",
+    "label_new_password": "Neues Passwort",
+    "placeholder_new_password": "Mindestens 8 Zeichen",
+    "hint_password": "Mindestens 8 Zeichen. Verwende kein Passwort von einer anderen Seite.",
+    "show_pw": "Zeigen",
+    "hide_pw": "Verbergen",
+    "btn_login": "Anmelden",
+    "link_forgot": "Passwort vergessen?",
+    "link_back": "Zurück zur Anmeldung",
+    "reset_title": "Passwort zurücksetzen",
+    "reset_subtitle_email": "Gib deine E-Mail ein, wir senden dir einen Code.",
+    "reset_subtitle_code": "Gib den Code aus deiner E-Mail ein und wähle ein neues Passwort.",
+    "btn_send_reset": "Code senden",
+    "btn_set_password": "Neues Passwort speichern",
+    "msg_reset_sent": "Falls diese E-Mail ein Konto hat, wurde ein Code gesendet.",
+    "msg_reset_done": "Passwort aktualisiert. Melde dich mit dem neuen an.",
+    "err_login_failed": "E-Mail oder Passwort falsch.",
+    "err_too_many": "Zu viele Versuche. Versuche es in einer Minute erneut.",
+    "err_password_short": "Das Passwort muss mindestens 8 Zeichen lang sein.",
+    "err_password_same_email": "Das Passwort darf nicht mit der E-Mail identisch sein.",
+    "err_reset_failed": "Das Passwort konnte nicht aktualisiert werden."
+  }
+};
 
-  function getLang() {
-    const code = localStorage.getItem(LANG_KEY) || 'en';
-    return translations[code] ? code : 'en';
-  }
-  function t(key) {
-    return (translations[getLang()] || translations.en)[key];
-  }
+  function getLang() { const c = localStorage.getItem(LANG_KEY) || 'en'; return translations[c] ? c : 'en'; }
+  function t(key) { return (translations[getLang()] || translations.en)[key]; }
   function applyLang() {
     const code = getLang();
     const dict = translations[code] || translations.en;
@@ -562,20 +727,50 @@
     document.getElementById('langIndicator').textContent = code.toUpperCase() + ' ▾';
   }
 
-  // ── Auth ───────────────────────────────────────────────────────────
+  // ── Password helpers ────────────────────────────────────────────────
+  // NOTE: In test mode the "database" lives in this browser only. A real
+  // backend must hash passwords (bcrypt/argon2) on the server and never
+  // store or log them in plain text.
+  function randSalt() { return Math.random().toString(36).slice(2) + Date.now().toString(36); }
+  async function hashPw(pw, salt) {
+    const data = salt + ':' + pw;
+    if (window.crypto && crypto.subtle) {
+      const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(data));
+      return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2, '0')).join('');
+    }
+    let h = 5381; for (let i = 0; i < data.length; i++) h = ((h << 5) + h + data.charCodeAt(i)) | 0;
+    return 'x' + (h >>> 0).toString(16);
+  }
+  function checkPassword(pw, email) {
+    if (pw.length < 8) return t('err_password_short');
+    if (pw.toLowerCase() === String(email).trim().toLowerCase()) return t('err_password_same_email');
+    return null;
+  }
+  function wirePwToggles() {
+    document.querySelectorAll('.pw-toggle').forEach(btn => {
+      const input = document.getElementById(btn.dataset.target);
+      const refresh = () => { btn.textContent = t(input.type === 'password' ? 'show_pw' : 'hide_pw'); };
+      btn.addEventListener('click', () => { input.type = input.type === 'password' ? 'text' : 'password'; refresh(); });
+      refresh();
+    });
+  }
+
+  // ── Auth ────────────────────────────────────────────────────────────
+  // Real backend contract (all POST, JSON):
+  //   /login          { email, password }                 -> { token, user }
+  //   /request-reset  { email }                           -> { sent: true }  (always, even if no account)
+  //   /reset-password { email, code, newPassword }        -> { ok: true }
   const API_BASE = "http://localhost:3000/api/auth";
 
-  // TEST MODE: simulates the login flow in the browser. Set to true only
-  // for local testing without a backend.
+  // TEST MODE: simulates the backend in this browser. Set to false once a
+  // real backend is deployed and API_BASE points to it.
   const MOCK_MODE = true;
   const MOCK_DELAY = 550;
 
-  function mockDb() {
-    try { return JSON.parse(localStorage.getItem('saturnpay_mock_users') || '{}'); }
-    catch (e) { return {}; }
-  }
+  function mockDb() { try { return JSON.parse(localStorage.getItem('saturnpay_mock_users') || '{}'); } catch (e) { return {}; } }
   function saveMockDb(db) { localStorage.setItem('saturnpay_mock_users', JSON.stringify(db)); }
   function mockCode() { return String(Math.floor(100000 + Math.random() * 900000)); }
+  const wait = ms => new Promise(r => setTimeout(r, ms));
 
   function showMockCode(code) {
     let hint = document.getElementById('mockCodeHint');
@@ -588,102 +783,106 @@
     hint.textContent = `${t('test_mode_prefix')} ${code}`;
   }
 
-  async function mockRequestCode(payload) {
-    await new Promise(r => setTimeout(r, MOCK_DELAY));
+  async function mockApi(action, p) {
+    await wait(MOCK_DELAY);
     const db = mockDb();
-    const email = payload.email;
-    if (!db[email] || !db[email].verified) {
-      return { ok: false, data: { error: t('err_no_account') } };
+    const email = String(p.email || '').trim().toLowerCase();
+    const rec = db[email];
+    if (action === 'login') {
+      if (rec && rec.lockUntil && rec.lockUntil > Date.now()) return { ok: false, data: { error: t('err_too_many') } };
+      const good = rec && rec.verified && rec.pwHash && (await hashPw(p.password, rec.salt)) === rec.pwHash;
+      if (!good) {
+        if (rec) {
+          rec.fails = (rec.fails || 0) + 1;
+          if (rec.fails >= 5) { rec.lockUntil = Date.now() + 60000; rec.fails = 0; }
+          saveMockDb(db);
+        }
+        return { ok: false, data: { error: t('err_login_failed') } };
+      }
+      rec.fails = 0; rec.lockUntil = 0; saveMockDb(db);
+      return { ok: true, data: { token: 'mock_' + Math.random().toString(36).slice(2, 14), user: { id: rec.id, name: rec.name, email: rec.email } } };
     }
-    const code = mockCode();
-    db[email].code = code;
-    saveMockDb(db);
-    showMockCode(code);
-    return { ok: true, data: { sent: true } };
-  }
-
-  async function mockVerifyCode(payload) {
-    await new Promise(r => setTimeout(r, MOCK_DELAY));
-    const db = mockDb();
-    const record = db[payload.email];
-    if (!record || record.code !== payload.code) {
-      return { ok: false, data: { error: t('err_code_invalid') } };
+    if (action === 'request-reset') {
+      if (rec && rec.verified) { rec.code = mockCode(); saveMockDb(db); showMockCode(rec.code); }
+      return { ok: true, data: { sent: true } }; // same answer whether or not the account exists
     }
-    const token = 'mock_' + Math.random().toString(36).slice(2, 14);
-    return { ok: true, data: { token, user: { id: record.id, name: record.name, email: record.email } } };
+    if (action === 'reset-password') {
+      if (!rec || !rec.verified || !rec.code || rec.code !== p.code) return { ok: false, data: { error: t('err_code_invalid') } };
+      rec.salt = randSalt(); rec.pwHash = await hashPw(p.newPassword, rec.salt);
+      rec.code = null; rec.fails = 0; rec.lockUntil = 0; saveMockDb(db);
+      return { ok: true, data: { ok: true } };
+    }
+    return { ok: false, data: { error: t('err_connection') } };
   }
 
   async function callAuthApi(action, payload) {
-    if (MOCK_MODE) {
-      if (action === 'request-code') return mockRequestCode(payload);
-      if (action === 'verify-code') return mockVerifyCode(payload);
-    }
-    const res = await fetch(`${API_BASE}/${action}`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(payload),
-    });
+    if (MOCK_MODE) return mockApi(action, payload);
+    const res = await fetch(`${API_BASE}/${action}`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
     const data = await res.json();
     return { ok: res.ok, data };
   }
 
-  const form = document.getElementById('loginForm');
-  const emailInput = document.getElementById('email');
-  const codeGroup = document.getElementById('codeGroup');
-  const codeInput = document.getElementById('code');
-  const submitBtn = document.getElementById('submitBtn');
-  const errorEl = document.getElementById('formError');
-  const verifyBox = document.getElementById('verifyBox');
+  const $ = id => document.getElementById(id);
+  const form = $('loginForm'), emailInput = $('email'), passwordInput = $('password'), codeInput = $('code'), newPwInput = $('newPassword');
+  const codeGroup = $('codeGroup'), pwGroup = $('pwGroup'), newPwGroup = $('newPwGroup');
+  const submitBtn = $('submitBtn'), errorEl = $('formError'), okEl = $('okMsg'), verifyBox = $('verifyBox');
+  let mode = 'login';
 
-  let step = 'email';
+  function showError(m) { okEl.style.display = 'none'; errorEl.textContent = m; errorEl.style.display = 'block'; }
+  function clearError() { errorEl.style.display = 'none'; }
+  function showOk(m) { clearError(); okEl.textContent = m; okEl.style.display = 'block'; }
+  function hideOk() { okEl.style.display = 'none'; }
+
+  function setMode(m) {
+    mode = m; clearError();
+    const L = m === 'login', C = m === 'reset-confirm';
+    $('titleEl').textContent = t(L ? 'login_title' : 'reset_title');
+    $('subEl').textContent = t(L ? 'login_subtitle_pw' : (C ? 'reset_subtitle_code' : 'reset_subtitle_email'));
+    pwGroup.style.display = L ? 'block' : 'none';
+    codeGroup.style.display = C ? 'block' : 'none';
+    newPwGroup.style.display = C ? 'block' : 'none';
+    $('forgotRow').style.display = L ? 'block' : 'none';
+    $('backRow').style.display = L ? 'none' : 'block';
+    $('extras').style.display = L ? 'block' : 'none';
+    emailInput.disabled = C;
+    passwordInput.required = L; codeInput.required = C; newPwInput.required = C;
+    submitBtn.textContent = t(L ? 'btn_login' : (m === 'reset-request' ? 'btn_send_reset' : 'btn_set_password'));
+    if (!C) { const h = $('mockCodeHint'); if (h) h.remove(); }
+  }
 
   setTimeout(() => {
     verifyBox.innerHTML = `<div style="color:#7FAE8C;font-size:16px;">✓</div><div class="verify-label">${t('verified_text')}</div>`;
     submitBtn.disabled = false;
   }, 1400);
 
-  function showError(message) {
-    errorEl.textContent = message;
-    errorEl.style.display = 'block';
-  }
-
-  function clearError() {
-    errorEl.style.display = 'none';
-  }
+  $('forgotBtn').addEventListener('click', () => { hideOk(); setMode('reset-request'); });
+  $('backBtn').addEventListener('click', () => { hideOk(); emailInput.disabled = false; setMode('login'); });
 
   form.addEventListener('submit', async function (e) {
     e.preventDefault();
-    clearError();
+    clearError(); hideOk();
     submitBtn.disabled = true;
-
     try {
-      if (step === 'email') {
-        const { ok, data } = await callAuthApi('request-code', { email: emailInput.value });
-
-        if (!ok) {
-          showError(data.error || t('err_code_send_failed'));
-          return;
-        }
-
-        step = 'code';
-        emailInput.disabled = true;
-        codeGroup.style.display = 'block';
-        submitBtn.textContent = t('btn_verify_code');
-        codeInput.focus();
-      } else {
-        const { ok, data } = await callAuthApi('verify-code', {
-          email: emailInput.value,
-          code: codeInput.value,
-        });
-
-        if (!ok) {
-          showError(data.error || t('err_code_verify_failed'));
-          return;
-        }
-
+      if (mode === 'login') {
+        const { ok, data } = await callAuthApi('login', { email: emailInput.value, password: passwordInput.value });
+        if (!ok) { showError(data.error || t('err_login_failed')); return; }
         localStorage.setItem('saturnpay_token', data.token);
         localStorage.setItem('saturnpay_user', JSON.stringify(data.user));
         window.location.href = 'dashboard.html';
+      } else if (mode === 'reset-request') {
+        await callAuthApi('request-reset', { email: emailInput.value });
+        setMode('reset-confirm');
+        showOk(t('msg_reset_sent'));
+        codeInput.focus();
+      } else {
+        const problem = checkPassword(newPwInput.value, emailInput.value);
+        if (problem) { showError(problem); return; }
+        const { ok, data } = await callAuthApi('reset-password', { email: emailInput.value, code: codeInput.value, newPassword: newPwInput.value });
+        if (!ok) { showError(data.error || t('err_reset_failed')); return; }
+        emailInput.disabled = false;
+        passwordInput.value = ''; codeInput.value = ''; newPwInput.value = '';
+        setMode('login');
+        showOk(t('msg_reset_done'));
       }
     } catch (err) {
       showError(t('err_connection'));
@@ -693,6 +892,8 @@
   });
 
   applyLang();
+  wirePwToggles();
+  setMode('login');
 </script>
 
 </body>

@@ -508,6 +508,13 @@
         <span class="value total" id="totalValue">0.00 USDT</span>
       </div>
 
+      <div id="wdCodeGroup" style="display:none;margin-top:6px;">
+        <p class="amount-hint" id="wdCodeSent" style="margin-bottom:10px;"></p>
+        <label class="field-label" for="wdCode" data-i18n="wdCodeLabel">Email confirmation code</label>
+        <input type="text" id="wdCode" class="address-input" data-i18n-placeholder="wdCodePlaceholder" inputmode="numeric" maxlength="6" autocomplete="one-time-code">
+        <p id="wdTestHint" style="margin:8px 0 12px;padding:9px 12px;border:1px dashed var(--gold-dim);border-radius:8px;font-family:'IBM Plex Mono',monospace;font-size:12.5px;color:var(--gold-bright);"></p>
+      </div>
+
       <button type="submit" class="confirm-btn" id="confirmBtn" data-i18n="confirmWithdrawal">Confirm Withdrawal Request</button>
       <p class="form-error" id="formError"></p>
     </form>
@@ -619,6 +626,71 @@
       minWithdrawError: 'Der Mindestauszahlungsbetrag beträgt 20 USDT.', insufficientBalance: 'Unzureichendes Guthaben (Betrag + Netzwerkgebühr).',
     },
   };
+
+  // Extra strings for the e-mail confirmation step
+  const extraTranslations = {
+  "en": {
+    "wdCodeLabel": "Email confirmation code",
+    "wdCodePlaceholder": "6-digit code",
+    "wdCodeSent": "For your security, we sent a 6-digit code to your email. Enter it to confirm this withdrawal.",
+    "wdTestPrefix": "TEST MODE · Your code:",
+    "wdConfirmWithCode": "Confirm with code",
+    "wdErrCode": "The code is incorrect.",
+    "wdErrExpired": "The code expired. Request a new one.",
+    "wdTooMany": "Too many wrong codes. Start the withdrawal again."
+  },
+  "tr": {
+    "wdCodeLabel": "E-posta onay kodu",
+    "wdCodePlaceholder": "6 haneli kod",
+    "wdCodeSent": "Güvenliğiniz için e-postanıza 6 haneli bir kod gönderdik. Çekimi onaylamak için girin.",
+    "wdTestPrefix": "TEST MODU · Kodunuz:",
+    "wdConfirmWithCode": "Kodla Onayla",
+    "wdErrCode": "Kod hatalı.",
+    "wdErrExpired": "Kodun süresi doldu. Yeni kod isteyin.",
+    "wdTooMany": "Çok fazla hatalı kod. Çekimi baştan başlatın."
+  },
+  "ru": {
+    "wdCodeLabel": "Код подтверждения из email",
+    "wdCodePlaceholder": "6-значный код",
+    "wdCodeSent": "Для вашей безопасности мы отправили 6-значный код на email. Введите его, чтобы подтвердить вывод.",
+    "wdTestPrefix": "ТЕСТОВЫЙ РЕЖИМ · Ваш код:",
+    "wdConfirmWithCode": "Подтвердить кодом",
+    "wdErrCode": "Неверный код.",
+    "wdErrExpired": "Срок действия кода истёк. Запросите новый.",
+    "wdTooMany": "Слишком много неверных кодов. Начните вывод заново."
+  },
+  "es": {
+    "wdCodeLabel": "Código de confirmación por correo",
+    "wdCodePlaceholder": "Código de 6 dígitos",
+    "wdCodeSent": "Por tu seguridad, enviamos un código de 6 dígitos a tu correo. Introdúcelo para confirmar el retiro.",
+    "wdTestPrefix": "MODO DE PRUEBA · Tu código:",
+    "wdConfirmWithCode": "Confirmar con código",
+    "wdErrCode": "El código es incorrecto.",
+    "wdErrExpired": "El código caducó. Solicita uno nuevo.",
+    "wdTooMany": "Demasiados códigos incorrectos. Empieza el retiro de nuevo."
+  },
+  "fr": {
+    "wdCodeLabel": "Code de confirmation par e-mail",
+    "wdCodePlaceholder": "Code à 6 chiffres",
+    "wdCodeSent": "Pour votre sécurité, nous avons envoyé un code à 6 chiffres à votre e-mail. Saisissez-le pour confirmer le retrait.",
+    "wdTestPrefix": "MODE TEST · Votre code :",
+    "wdConfirmWithCode": "Confirmer avec le code",
+    "wdErrCode": "Le code est incorrect.",
+    "wdErrExpired": "Le code a expiré. Demandez-en un nouveau.",
+    "wdTooMany": "Trop de codes incorrects. Recommencez le retrait."
+  },
+  "de": {
+    "wdCodeLabel": "E-Mail-Bestätigungscode",
+    "wdCodePlaceholder": "6-stelliger Code",
+    "wdCodeSent": "Zu deiner Sicherheit haben wir einen 6-stelligen Code an deine E-Mail gesendet. Gib ihn ein, um die Auszahlung zu bestätigen.",
+    "wdTestPrefix": "TESTMODUS · Dein Code:",
+    "wdConfirmWithCode": "Mit Code bestätigen",
+    "wdErrCode": "Der Code ist falsch.",
+    "wdErrExpired": "Der Code ist abgelaufen. Fordere einen neuen an.",
+    "wdTooMany": "Zu viele falsche Codes. Starte die Auszahlung neu."
+  }
+};
+  Object.keys(extraTranslations).forEach(l => Object.assign(translations[l], extraTranslations[l]));
 
   function getLang() { return localStorage.getItem(LANG_KEY) || 'en'; }
   function t(key) { return (translations[getLang()] || translations.en)[key]; }
@@ -802,6 +874,32 @@
       return;
     }
 
+    // E-mail code confirmation (test mode). A real backend must send the code
+    // by e-mail (POST /withdraw/request-code) and verify it on the server
+    // (POST /withdraw) together with address, amount and network.
+    const sig = [address, amt, activeNetwork].join('|');
+    const pend = window.__wdPending;
+    if (!pend || pend.sig !== sig) {
+      const code = String(Math.floor(100000 + Math.random() * 900000));
+      window.__wdPending = { sig, code, exp: Date.now() + 10 * 60 * 1000, tries: 0 };
+      document.getElementById('wdCodeSent').textContent = t('wdCodeSent');
+      document.getElementById('wdTestHint').textContent = t('wdTestPrefix') + ' ' + code;
+      document.getElementById('wdCode').value = '';
+      document.getElementById('wdCodeGroup').style.display = 'block';
+      confirmBtn.textContent = t('wdConfirmWithCode');
+      document.getElementById('wdCode').focus();
+      formError.style.display = 'none';
+      return;
+    }
+    if (Date.now() > pend.exp) { window.__wdPending = null; showError(t('wdErrExpired')); return; }
+    if (document.getElementById('wdCode').value.trim() !== pend.code) {
+      pend.tries += 1;
+      if (pend.tries >= 5) { window.__wdPending = null; document.getElementById('wdCodeGroup').style.display = 'none'; confirmBtn.textContent = t('confirmWithdrawal'); showError(t('wdTooMany')); return; }
+      showError(t('wdErrCode'));
+      return;
+    }
+    window.__wdPending = null;
+
     transactions.push({
       id: makeId(),
       description: 'USDT Withdrawal (' + activeNetwork + ')',
@@ -815,6 +913,17 @@
     form.classList.add('hidden');
     successState.classList.add('show');
   });
+
+  function resetCodeStep() {
+    if (!window.__wdPending) return;
+    window.__wdPending = null;
+    document.getElementById('wdCodeGroup').style.display = 'none';
+    confirmBtn.textContent = t('confirmWithdrawal');
+  }
+  amountInput.addEventListener('input', resetCodeStep);
+  destAddress.addEventListener('input', resetCodeStep);
+  networkTabs.addEventListener('click', resetCodeStep);
+  quickAmounts.addEventListener('click', resetCodeStep);
 
   applyLang();
   updateTotal();

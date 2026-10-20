@@ -198,7 +198,7 @@
     color:var(--text-dim);
     margin-bottom:9px;
   }
-  input[type="email"], input[type="text"]{
+  input[type="email"], input[type="text"], input[type="password"]{
     width:100%;
     background:var(--field);
     border:1px solid var(--line);
@@ -339,6 +339,16 @@
     .saturn-hero{ width:104px; height:104px; margin-bottom:2px; }
     .auth-card{ padding:32px 24px; border-radius:14px; }
   }
+
+  .pw-wrap{ position:relative; }
+  .pw-wrap input{ padding-right:70px; }
+  .pw-toggle{ position:absolute; right:12px; top:12px; background:none; border:none; color:var(--text-dim);
+    font-size:12px; cursor:pointer; font-family:'Inter',sans-serif; padding:4px 6px; }
+  .pw-toggle:hover{ color:var(--gold-bright); }
+  .hint-small{ font-size:11.5px; color:var(--text-faint); margin:-10px 0 16px; line-height:1.45; }
+  .link-row{ text-align:center; margin:-8px 0 20px; }
+  .link-btn{ background:none; border:none; color:var(--gold-bright); cursor:pointer; font-family:'Inter',sans-serif; font-size:13px; text-decoration:underline; text-underline-offset:3px; }
+  .ok-msg{ color:var(--good); font-size:13px; margin:-6px 0 16px; display:none; line-height:1.45; }
 </style>
 </head>
 <body>
@@ -371,14 +381,28 @@
 
     <form id="registerForm">
       <label for="name" id="nameLabel" data-i18n="label_name">Full Name</label>
-      <input type="text" id="name" data-i18n-placeholder="placeholder_name" placeholder="Your full name" required>
+      <input type="text" id="name" data-i18n-placeholder="placeholder_name" autocomplete="name" required>
 
       <label for="email" id="emailLabel" data-i18n="label_email">Email</label>
-      <input type="email" id="email" data-i18n-placeholder="placeholder_email" placeholder="you@company.com" required>
+      <input type="email" id="email" data-i18n-placeholder="placeholder_email" autocomplete="email" required>
+
+      <div id="pwBlock">
+        <label for="password" data-i18n="label_password">label_password</label>
+      <div class="pw-wrap">
+        <input type="password" id="password" data-i18n-placeholder="placeholder_password" autocomplete="new-password">
+        <button type="button" class="pw-toggle" data-target="password"></button>
+      </div>
+        <label for="password2" data-i18n="label_password_confirm">label_password_confirm</label>
+      <div class="pw-wrap">
+        <input type="password" id="password2" data-i18n-placeholder="placeholder_password_confirm" autocomplete="new-password">
+        <button type="button" class="pw-toggle" data-target="password2"></button>
+      </div>
+        <p class="hint-small" data-i18n="hint_password">At least 8 characters.</p>
+      </div>
 
       <div id="codeGroup" style="display:none;">
         <label for="code" data-i18n="label_code">Verification Code</label>
-        <input type="text" id="code" data-i18n-placeholder="placeholder_code" placeholder="6-digit code" inputmode="numeric" maxlength="6" style="margin-bottom:18px;">
+        <input type="text" id="code" data-i18n-placeholder="placeholder_code" inputmode="numeric" maxlength="6" autocomplete="one-time-code" style="margin-bottom:18px;">
       </div>
 
       <div class="checkbox-row" id="termsRow">
@@ -408,194 +432,248 @@
 <footer data-i18n="footer_copyright">© 2026 SATURN-PAY · ALL RIGHTS RESERVED</footer>
 
 <script>
-  // ── i18n (inline dictionary, same pattern as the other pages) ──────
   const LANG_KEY = 'saturnpay_lang';
   const LOCALE_MAP = { en: 'en-US', tr: 'tr-TR', ru: 'ru-RU', es: 'es-ES', fr: 'fr-FR', de: 'de-DE' };
 
   const translations = {
-    en: {
-      register_title: 'Create account',
-      register_subtitle: 'Set up your account with a few details.',
-      label_name: 'Full Name',
-      placeholder_name: 'Your full name',
-      label_email: 'Email',
-      placeholder_email: 'you@company.com',
-      label_code: 'Verification Code',
-      placeholder_code: '6-digit code',
-      terms_before: 'I have read and accept the ',
-      terms_link: 'Terms of Use',
-      terms_after: '.',
-      verifying_text: 'Verifying…',
-      verifying_sub: 'Automatic traffic check',
-      verified_text: 'Verified',
-      btn_create_account: 'Create Account',
-      btn_verify_code: 'Verify Code',
-      btn_have_account: 'I already have an account',
-      divider_or: 'or',
-      footer_copyright: '© 2026 SATURN-PAY · ALL RIGHTS RESERVED',
-      test_mode_prefix: 'TEST MODE · Your code:',
-      err_terms: 'You must accept the terms of use to continue.',
-      err_exists: 'An account with this email already exists.',
-      err_no_account: 'No account found for this email.',
-      err_code_invalid: 'The code is incorrect or has expired.',
-      err_code_send_failed: 'Could not send the code.',
-      err_code_verify_failed: 'Could not verify the code.',
-      err_connection: 'Could not reach the server. Check your connection.',
-    },
-    tr: {
-      register_title: 'Hesap oluştur',
-      register_subtitle: 'Birkaç bilgiyle hesabınızı oluşturun.',
-      label_name: 'Ad Soyad',
-      placeholder_name: 'Adınız Soyadınız',
-      label_email: 'E-posta',
-      placeholder_email: 'ornek@sirket.com',
-      label_code: 'Doğrulama Kodu',
-      placeholder_code: '6 haneli kod',
-      terms_before: '',
-      terms_link: 'Kullanım Koşulları',
-      terms_after: '\'nı okudum ve kabul ediyorum.',
-      verifying_text: 'Doğrulanıyor…',
-      verifying_sub: 'Otomatik trafik kontrolü',
-      verified_text: 'Doğrulandı',
-      btn_create_account: 'Hesap Oluştur',
-      btn_verify_code: 'Kodu Doğrula',
-      btn_have_account: 'Zaten hesabım var',
-      divider_or: 'veya',
-      footer_copyright: '© 2026 SATURN-PAY · TÜM HAKLARI SAKLIDIR',
-      test_mode_prefix: 'TEST MODU · Kodunuz:',
-      err_terms: 'Devam etmek için kullanım koşullarını kabul etmelisiniz.',
-      err_exists: 'Bu e-posta ile zaten bir hesap var.',
-      err_no_account: 'Bu e-posta ile kayıtlı bir hesap bulunamadı.',
-      err_code_invalid: 'Kod hatalı veya süresi dolmuş.',
-      err_code_send_failed: 'Kod gönderilemedi.',
-      err_code_verify_failed: 'Kod doğrulanamadı.',
-      err_connection: 'Sunucuya bağlanılamadı. Bağlantınızı kontrol edin.',
-    },
-    ru: {
-      register_title: 'Создать аккаунт',
-      register_subtitle: 'Создайте аккаунт, указав несколько данных.',
-      label_name: 'Имя и фамилия',
-      placeholder_name: 'Ваше имя и фамилия',
-      label_email: 'Email',
-      placeholder_email: 'you@company.com',
-      label_code: 'Код подтверждения',
-      placeholder_code: '6-значный код',
-      terms_before: 'Я прочитал(а) и принимаю ',
-      terms_link: 'Условия использования',
-      terms_after: '.',
-      verifying_text: 'Проверка…',
-      verifying_sub: 'Автоматическая проверка трафика',
-      verified_text: 'Проверено',
-      btn_create_account: 'Создать аккаунт',
-      btn_verify_code: 'Подтвердить код',
-      btn_have_account: 'У меня уже есть аккаунт',
-      divider_or: 'или',
-      footer_copyright: '© 2026 SATURN-PAY · ВСЕ ПРАВА ЗАЩИЩЕНЫ',
-      test_mode_prefix: 'ТЕСТОВЫЙ РЕЖИМ · Ваш код:',
-      err_terms: 'Чтобы продолжить, примите условия использования.',
-      err_exists: 'Аккаунт с этим email уже существует.',
-      err_no_account: 'Аккаунт с этим email не найден.',
-      err_code_invalid: 'Код неверный или срок его действия истёк.',
-      err_code_send_failed: 'Не удалось отправить код.',
-      err_code_verify_failed: 'Не удалось проверить код.',
-      err_connection: 'Не удалось подключиться к серверу. Проверьте соединение.',
-    },
-    es: {
-      register_title: 'Crear cuenta',
-      register_subtitle: 'Configura tu cuenta con unos pocos datos.',
-      label_name: 'Nombre completo',
-      placeholder_name: 'Tu nombre completo',
-      label_email: 'Correo electrónico',
-      placeholder_email: 'tu@empresa.com',
-      label_code: 'Código de verificación',
-      placeholder_code: 'Código de 6 dígitos',
-      terms_before: 'He leído y acepto los ',
-      terms_link: 'Términos de uso',
-      terms_after: '.',
-      verifying_text: 'Verificando…',
-      verifying_sub: 'Comprobación automática de tráfico',
-      verified_text: 'Verificado',
-      btn_create_account: 'Crear cuenta',
-      btn_verify_code: 'Verificar código',
-      btn_have_account: 'Ya tengo una cuenta',
-      divider_or: 'o',
-      footer_copyright: '© 2026 SATURN-PAY · TODOS LOS DERECHOS RESERVADOS',
-      test_mode_prefix: 'MODO DE PRUEBA · Tu código:',
-      err_terms: 'Debes aceptar los términos de uso para continuar.',
-      err_exists: 'Ya existe una cuenta con este correo.',
-      err_no_account: 'No se encontró una cuenta con este correo.',
-      err_code_invalid: 'El código es incorrecto o ha caducado.',
-      err_code_send_failed: 'No se pudo enviar el código.',
-      err_code_verify_failed: 'No se pudo verificar el código.',
-      err_connection: 'No se pudo conectar con el servidor. Revisa tu conexión.',
-    },
-    fr: {
-      register_title: 'Créer un compte',
-      register_subtitle: 'Créez votre compte en quelques informations.',
-      label_name: 'Nom complet',
-      placeholder_name: 'Votre nom complet',
-      label_email: 'E-mail',
-      placeholder_email: 'vous@entreprise.com',
-      label_code: 'Code de vérification',
-      placeholder_code: 'Code à 6 chiffres',
-      terms_before: 'J\'ai lu et j\'accepte les ',
-      terms_link: 'Conditions d\'utilisation',
-      terms_after: '.',
-      verifying_text: 'Vérification…',
-      verifying_sub: 'Contrôle automatique du trafic',
-      verified_text: 'Vérifié',
-      btn_create_account: 'Créer un compte',
-      btn_verify_code: 'Vérifier le code',
-      btn_have_account: 'J\'ai déjà un compte',
-      divider_or: 'ou',
-      footer_copyright: '© 2026 SATURN-PAY · TOUS DROITS RÉSERVÉS',
-      test_mode_prefix: 'MODE TEST · Votre code :',
-      err_terms: 'Vous devez accepter les conditions d\'utilisation pour continuer.',
-      err_exists: 'Un compte existe déjà avec cet e-mail.',
-      err_no_account: 'Aucun compte trouvé pour cet e-mail.',
-      err_code_invalid: 'Le code est incorrect ou a expiré.',
-      err_code_send_failed: 'Impossible d\'envoyer le code.',
-      err_code_verify_failed: 'Impossible de vérifier le code.',
-      err_connection: 'Impossible de joindre le serveur. Vérifiez votre connexion.',
-    },
-    de: {
-      register_title: 'Konto erstellen',
-      register_subtitle: 'Richte dein Konto mit wenigen Angaben ein.',
-      label_name: 'Vollständiger Name',
-      placeholder_name: 'Dein vollständiger Name',
-      label_email: 'E-Mail',
-      placeholder_email: 'du@firma.com',
-      label_code: 'Bestätigungscode',
-      placeholder_code: '6-stelliger Code',
-      terms_before: 'Ich habe die ',
-      terms_link: 'Nutzungsbedingungen',
-      terms_after: ' gelesen und akzeptiere sie.',
-      verifying_text: 'Wird überprüft…',
-      verifying_sub: 'Automatische Verkehrsprüfung',
-      verified_text: 'Überprüft',
-      btn_create_account: 'Konto erstellen',
-      btn_verify_code: 'Code bestätigen',
-      btn_have_account: 'Ich habe bereits ein Konto',
-      divider_or: 'oder',
-      footer_copyright: '© 2026 SATURN-PAY · ALLE RECHTE VORBEHALTEN',
-      test_mode_prefix: 'TESTMODUS · Dein Code:',
-      err_terms: 'Du musst die Nutzungsbedingungen akzeptieren, um fortzufahren.',
-      err_exists: 'Mit dieser E-Mail existiert bereits ein Konto.',
-      err_no_account: 'Für diese E-Mail wurde kein Konto gefunden.',
-      err_code_invalid: 'Der Code ist falsch oder abgelaufen.',
-      err_code_send_failed: 'Der Code konnte nicht gesendet werden.',
-      err_code_verify_failed: 'Der Code konnte nicht überprüft werden.',
-      err_connection: 'Server nicht erreichbar. Bitte prüfe deine Verbindung.',
-    },
-  };
+  "en": {
+    "register_title": "Create account",
+    "register_subtitle": "Set up your account with a few details.",
+    "label_name": "Full Name",
+    "placeholder_name": "Your full name",
+    "label_email": "Email",
+    "placeholder_email": "you@company.com",
+    "label_code": "Verification Code",
+    "placeholder_code": "6-digit code",
+    "terms_before": "I have read and accept the ",
+    "terms_link": "Terms of Use",
+    "terms_after": ".",
+    "verifying_text": "Verifying…",
+    "verifying_sub": "Automatic traffic check",
+    "verified_text": "Verified",
+    "btn_create_account": "Create Account",
+    "btn_verify_code": "Verify Code",
+    "btn_have_account": "I already have an account",
+    "divider_or": "or",
+    "footer_copyright": "© 2026 SATURN-PAY · ALL RIGHTS RESERVED",
+    "test_mode_prefix": "TEST MODE · Your code:",
+    "err_terms": "You must accept the terms of use to continue.",
+    "err_exists": "An account with this email already exists.",
+    "err_no_account": "No account found for this email.",
+    "err_code_invalid": "The code is incorrect or has expired.",
+    "err_code_send_failed": "Could not send the code.",
+    "err_code_verify_failed": "Could not verify the code.",
+    "err_connection": "Could not reach the server. Check your connection.",
+    "label_password": "Password",
+    "placeholder_password": "Your password",
+    "label_password_confirm": "Confirm Password",
+    "placeholder_password_confirm": "Repeat your password",
+    "hint_password": "At least 8 characters. Do not reuse a password from another site.",
+    "show_pw": "Show",
+    "hide_pw": "Hide",
+    "err_password_short": "The password must be at least 8 characters.",
+    "err_password_same_email": "The password cannot be the same as your email.",
+    "err_password_mismatch": "The passwords do not match."
+  },
+  "tr": {
+    "register_title": "Hesap oluştur",
+    "register_subtitle": "Birkaç bilgiyle hesabınızı oluşturun.",
+    "label_name": "Ad Soyad",
+    "placeholder_name": "Adınız Soyadınız",
+    "label_email": "E-posta",
+    "placeholder_email": "ornek@sirket.com",
+    "label_code": "Doğrulama Kodu",
+    "placeholder_code": "6 haneli kod",
+    "terms_before": "",
+    "terms_link": "Kullanım Koşulları",
+    "terms_after": "'nı okudum ve kabul ediyorum.",
+    "verifying_text": "Doğrulanıyor…",
+    "verifying_sub": "Otomatik trafik kontrolü",
+    "verified_text": "Doğrulandı",
+    "btn_create_account": "Hesap Oluştur",
+    "btn_verify_code": "Kodu Doğrula",
+    "btn_have_account": "Zaten hesabım var",
+    "divider_or": "veya",
+    "footer_copyright": "© 2026 SATURN-PAY · TÜM HAKLARI SAKLIDIR",
+    "test_mode_prefix": "TEST MODU · Kodunuz:",
+    "err_terms": "Devam etmek için kullanım koşullarını kabul etmelisiniz.",
+    "err_exists": "Bu e-posta ile zaten bir hesap var.",
+    "err_no_account": "Bu e-posta ile kayıtlı bir hesap bulunamadı.",
+    "err_code_invalid": "Kod hatalı veya süresi dolmuş.",
+    "err_code_send_failed": "Kod gönderilemedi.",
+    "err_code_verify_failed": "Kod doğrulanamadı.",
+    "err_connection": "Sunucuya bağlanılamadı. Bağlantınızı kontrol edin.",
+    "label_password": "Şifre",
+    "placeholder_password": "Şifreniz",
+    "label_password_confirm": "Şifreyi Doğrula",
+    "placeholder_password_confirm": "Şifrenizi tekrar yazın",
+    "hint_password": "En az 8 karakter. Başka bir sitede kullandığınız şifreyi kullanmayın.",
+    "show_pw": "Göster",
+    "hide_pw": "Gizle",
+    "err_password_short": "Şifre en az 8 karakter olmalı.",
+    "err_password_same_email": "Şifre e-posta adresinizle aynı olamaz.",
+    "err_password_mismatch": "Şifreler eşleşmiyor."
+  },
+  "ru": {
+    "register_title": "Создать аккаунт",
+    "register_subtitle": "Создайте аккаунт, указав несколько данных.",
+    "label_name": "Имя и фамилия",
+    "placeholder_name": "Ваше имя и фамилия",
+    "label_email": "Email",
+    "placeholder_email": "you@company.com",
+    "label_code": "Код подтверждения",
+    "placeholder_code": "6-значный код",
+    "terms_before": "Я прочитал(а) и принимаю ",
+    "terms_link": "Условия использования",
+    "terms_after": ".",
+    "verifying_text": "Проверка…",
+    "verifying_sub": "Автоматическая проверка трафика",
+    "verified_text": "Проверено",
+    "btn_create_account": "Создать аккаунт",
+    "btn_verify_code": "Подтвердить код",
+    "btn_have_account": "У меня уже есть аккаунт",
+    "divider_or": "или",
+    "footer_copyright": "© 2026 SATURN-PAY · ВСЕ ПРАВА ЗАЩИЩЕНЫ",
+    "test_mode_prefix": "ТЕСТОВЫЙ РЕЖИМ · Ваш код:",
+    "err_terms": "Чтобы продолжить, примите условия использования.",
+    "err_exists": "Аккаунт с этим email уже существует.",
+    "err_no_account": "Аккаунт с этим email не найден.",
+    "err_code_invalid": "Код неверный или срок его действия истёк.",
+    "err_code_send_failed": "Не удалось отправить код.",
+    "err_code_verify_failed": "Не удалось проверить код.",
+    "err_connection": "Не удалось подключиться к серверу. Проверьте соединение.",
+    "label_password": "Пароль",
+    "placeholder_password": "Ваш пароль",
+    "label_password_confirm": "Подтвердите пароль",
+    "placeholder_password_confirm": "Повторите пароль",
+    "hint_password": "Не менее 8 символов. Не используйте пароль с других сайтов.",
+    "show_pw": "Показать",
+    "hide_pw": "Скрыть",
+    "err_password_short": "Пароль должен содержать не менее 8 символов.",
+    "err_password_same_email": "Пароль не может совпадать с email.",
+    "err_password_mismatch": "Пароли не совпадают."
+  },
+  "es": {
+    "register_title": "Crear cuenta",
+    "register_subtitle": "Configura tu cuenta con unos pocos datos.",
+    "label_name": "Nombre completo",
+    "placeholder_name": "Tu nombre completo",
+    "label_email": "Correo electrónico",
+    "placeholder_email": "tu@empresa.com",
+    "label_code": "Código de verificación",
+    "placeholder_code": "Código de 6 dígitos",
+    "terms_before": "He leído y acepto los ",
+    "terms_link": "Términos de uso",
+    "terms_after": ".",
+    "verifying_text": "Verificando…",
+    "verifying_sub": "Comprobación automática de tráfico",
+    "verified_text": "Verificado",
+    "btn_create_account": "Crear cuenta",
+    "btn_verify_code": "Verificar código",
+    "btn_have_account": "Ya tengo una cuenta",
+    "divider_or": "o",
+    "footer_copyright": "© 2026 SATURN-PAY · TODOS LOS DERECHOS RESERVADOS",
+    "test_mode_prefix": "MODO DE PRUEBA · Tu código:",
+    "err_terms": "Debes aceptar los términos de uso para continuar.",
+    "err_exists": "Ya existe una cuenta con este correo.",
+    "err_no_account": "No se encontró una cuenta con este correo.",
+    "err_code_invalid": "El código es incorrecto o ha caducado.",
+    "err_code_send_failed": "No se pudo enviar el código.",
+    "err_code_verify_failed": "No se pudo verificar el código.",
+    "err_connection": "No se pudo conectar con el servidor. Revisa tu conexión.",
+    "label_password": "Contraseña",
+    "placeholder_password": "Tu contraseña",
+    "label_password_confirm": "Confirmar contraseña",
+    "placeholder_password_confirm": "Repite tu contraseña",
+    "hint_password": "Al menos 8 caracteres. No reutilices una contraseña de otro sitio.",
+    "show_pw": "Mostrar",
+    "hide_pw": "Ocultar",
+    "err_password_short": "La contraseña debe tener al menos 8 caracteres.",
+    "err_password_same_email": "La contraseña no puede ser igual al correo.",
+    "err_password_mismatch": "Las contraseñas no coinciden."
+  },
+  "fr": {
+    "register_title": "Créer un compte",
+    "register_subtitle": "Créez votre compte en quelques informations.",
+    "label_name": "Nom complet",
+    "placeholder_name": "Votre nom complet",
+    "label_email": "E-mail",
+    "placeholder_email": "vous@entreprise.com",
+    "label_code": "Code de vérification",
+    "placeholder_code": "Code à 6 chiffres",
+    "terms_before": "J'ai lu et j'accepte les ",
+    "terms_link": "Conditions d'utilisation",
+    "terms_after": ".",
+    "verifying_text": "Vérification…",
+    "verifying_sub": "Contrôle automatique du trafic",
+    "verified_text": "Vérifié",
+    "btn_create_account": "Créer un compte",
+    "btn_verify_code": "Vérifier le code",
+    "btn_have_account": "J'ai déjà un compte",
+    "divider_or": "ou",
+    "footer_copyright": "© 2026 SATURN-PAY · TOUS DROITS RÉSERVÉS",
+    "test_mode_prefix": "MODE TEST · Votre code :",
+    "err_terms": "Vous devez accepter les conditions d'utilisation pour continuer.",
+    "err_exists": "Un compte existe déjà avec cet e-mail.",
+    "err_no_account": "Aucun compte trouvé pour cet e-mail.",
+    "err_code_invalid": "Le code est incorrect ou a expiré.",
+    "err_code_send_failed": "Impossible d'envoyer le code.",
+    "err_code_verify_failed": "Impossible de vérifier le code.",
+    "err_connection": "Impossible de joindre le serveur. Vérifiez votre connexion.",
+    "label_password": "Mot de passe",
+    "placeholder_password": "Votre mot de passe",
+    "label_password_confirm": "Confirmer le mot de passe",
+    "placeholder_password_confirm": "Répétez votre mot de passe",
+    "hint_password": "Au moins 8 caractères. Ne réutilisez pas un mot de passe d'un autre site.",
+    "show_pw": "Afficher",
+    "hide_pw": "Masquer",
+    "err_password_short": "Le mot de passe doit contenir au moins 8 caractères.",
+    "err_password_same_email": "Le mot de passe ne peut pas être identique à l'e-mail.",
+    "err_password_mismatch": "Les mots de passe ne correspondent pas."
+  },
+  "de": {
+    "register_title": "Konto erstellen",
+    "register_subtitle": "Richte dein Konto mit wenigen Angaben ein.",
+    "label_name": "Vollständiger Name",
+    "placeholder_name": "Dein vollständiger Name",
+    "label_email": "E-Mail",
+    "placeholder_email": "du@firma.com",
+    "label_code": "Bestätigungscode",
+    "placeholder_code": "6-stelliger Code",
+    "terms_before": "Ich habe die ",
+    "terms_link": "Nutzungsbedingungen",
+    "terms_after": " gelesen und akzeptiere sie.",
+    "verifying_text": "Wird überprüft…",
+    "verifying_sub": "Automatische Verkehrsprüfung",
+    "verified_text": "Überprüft",
+    "btn_create_account": "Konto erstellen",
+    "btn_verify_code": "Code bestätigen",
+    "btn_have_account": "Ich habe bereits ein Konto",
+    "divider_or": "oder",
+    "footer_copyright": "© 2026 SATURN-PAY · ALLE RECHTE VORBEHALTEN",
+    "test_mode_prefix": "TESTMODUS · Dein Code:",
+    "err_terms": "Du musst die Nutzungsbedingungen akzeptieren, um fortzufahren.",
+    "err_exists": "Mit dieser E-Mail existiert bereits ein Konto.",
+    "err_no_account": "Für diese E-Mail wurde kein Konto gefunden.",
+    "err_code_invalid": "Der Code ist falsch oder abgelaufen.",
+    "err_code_send_failed": "Der Code konnte nicht gesendet werden.",
+    "err_code_verify_failed": "Der Code konnte nicht überprüft werden.",
+    "err_connection": "Server nicht erreichbar. Bitte prüfe deine Verbindung.",
+    "label_password": "Passwort",
+    "placeholder_password": "Dein Passwort",
+    "label_password_confirm": "Passwort bestätigen",
+    "placeholder_password_confirm": "Passwort wiederholen",
+    "hint_password": "Mindestens 8 Zeichen. Verwende kein Passwort von einer anderen Seite.",
+    "show_pw": "Zeigen",
+    "hide_pw": "Verbergen",
+    "err_password_short": "Das Passwort muss mindestens 8 Zeichen lang sein.",
+    "err_password_same_email": "Das Passwort darf nicht mit der E-Mail identisch sein.",
+    "err_password_mismatch": "Die Passwörter stimmen nicht überein."
+  }
+};
 
-  function getLang() {
-    const code = localStorage.getItem(LANG_KEY) || 'en';
-    return translations[code] ? code : 'en';
-  }
-  function t(key) {
-    return (translations[getLang()] || translations.en)[key];
-  }
+  function getLang() { const c = localStorage.getItem(LANG_KEY) || 'en'; return translations[c] ? c : 'en'; }
+  function t(key) { return (translations[getLang()] || translations.en)[key]; }
   function applyLang() {
     const code = getLang();
     const dict = translations[code] || translations.en;
@@ -612,26 +690,52 @@
     document.getElementById('langIndicator').textContent = code.toUpperCase() + ' ▾';
   }
 
+  // ── Password helpers ────────────────────────────────────────────────
+  // NOTE: In test mode the "database" lives in this browser only. A real
+  // backend must hash passwords (bcrypt/argon2) on the server and never
+  // store or log them in plain text.
+  function randSalt() { return Math.random().toString(36).slice(2) + Date.now().toString(36); }
+  async function hashPw(pw, salt) {
+    const data = salt + ':' + pw;
+    if (window.crypto && crypto.subtle) {
+      const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(data));
+      return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2, '0')).join('');
+    }
+    let h = 5381; for (let i = 0; i < data.length; i++) h = ((h << 5) + h + data.charCodeAt(i)) | 0;
+    return 'x' + (h >>> 0).toString(16);
+  }
+  function checkPassword(pw, email) {
+    if (pw.length < 8) return t('err_password_short');
+    if (pw.toLowerCase() === String(email).trim().toLowerCase()) return t('err_password_same_email');
+    return null;
+  }
+  function wirePwToggles() {
+    document.querySelectorAll('.pw-toggle').forEach(btn => {
+      const input = document.getElementById(btn.dataset.target);
+      const refresh = () => { btn.textContent = t(input.type === 'password' ? 'show_pw' : 'hide_pw'); };
+      btn.addEventListener('click', () => { input.type = input.type === 'password' ? 'text' : 'password'; refresh(); });
+      refresh();
+    });
+  }
 
-  // ── Auth ───────────────────────────────────────────────────────────
-  // Set API_BASE to your deployed auth backend URL.
+  // ── Auth ────────────────────────────────────────────────────────────
+  // Real backend contract (all POST, JSON):
+  //   /request-code { email, name, password, termsAccepted } -> { sent: true }
+  //       (server validates, stores a HASH of the password as pending, emails a code)
+  //   /verify-code  { email, code }                          -> { token, user }
+  //       (activates the account with the pending password)
   const API_BASE = "http://localhost:3000/api/auth";
 
-  // ── TEST MODU ──────────────────────────────────────────────────────
-  // Gerçek bir backend hazır olana kadar kayıt/giriş akışını burada,
-  // tarayıcıda simüle ediyoruz. Backend hazır olduğunda MOCK_MODE'u
-  // false yapın; kod hiçbir başka değişiklik gerektirmeden gerçek
-  // API_BASE'e fetch atmaya geri döner.
+  // TEST MODE: simulates the backend in this browser. Set to false once a
+  // real backend is deployed and API_BASE points to it.
   const MOCK_MODE = true;
   const MOCK_DELAY = 550;
 
-  function mockDb() {
-    try { return JSON.parse(localStorage.getItem('saturnpay_mock_users') || '{}'); }
-    catch (e) { return {}; }
-  }
+  function mockDb() { try { return JSON.parse(localStorage.getItem('saturnpay_mock_users') || '{}'); } catch (e) { return {}; } }
   function saveMockDb(db) { localStorage.setItem('saturnpay_mock_users', JSON.stringify(db)); }
   function mockCode() { return String(Math.floor(100000 + Math.random() * 900000)); }
   function mockId() { return 'usr_' + Math.random().toString(36).slice(2, 10); }
+  const wait = ms => new Promise(r => setTimeout(r, ms));
 
   function showMockCode(code) {
     let hint = document.getElementById('mockCodeHint');
@@ -644,130 +748,77 @@
     hint.textContent = `${t('test_mode_prefix')} ${code}`;
   }
 
-  async function mockRequestCode(payload, mode) {
-    await new Promise(r => setTimeout(r, MOCK_DELAY));
+  async function mockApi(action, p) {
+    await wait(MOCK_DELAY);
     const db = mockDb();
-    const email = payload.email;
-    if (mode === 'register') {
-      if (db[email] && db[email].verified) {
-        return { ok: false, data: { error: t('err_exists') } };
-      }
+    const email = String(p.email || '').trim().toLowerCase();
+    if (action === 'request-code') {
+      if (db[email] && db[email].verified) return { ok: false, data: { error: t('err_exists') } };
       const code = mockCode();
-      db[email] = { name: payload.name, email, id: (db[email] && db[email].id) || mockId(), code, verified: false };
+      const salt = randSalt();
+      db[email] = { name: p.name, email, id: (db[email] && db[email].id) || mockId(), code, verified: false, salt, pwHash: await hashPw(p.password, salt) };
       saveMockDb(db);
       showMockCode(code);
       return { ok: true, data: { sent: true } };
     }
-    if (!db[email] || !db[email].verified) {
-      return { ok: false, data: { error: t('err_no_account') } };
+    if (action === 'verify-code') {
+      const rec = db[email];
+      if (!rec || !rec.code || rec.code !== p.code) return { ok: false, data: { error: t('err_code_invalid') } };
+      rec.verified = true; rec.code = null; saveMockDb(db);
+      return { ok: true, data: { token: 'mock_' + Math.random().toString(36).slice(2, 14), user: { id: rec.id, name: rec.name, email: rec.email } } };
     }
-    const code = mockCode();
-    db[email].code = code;
-    saveMockDb(db);
-    showMockCode(code);
-    return { ok: true, data: { sent: true } };
-  }
-
-  async function mockVerifyCode(payload) {
-    await new Promise(r => setTimeout(r, MOCK_DELAY));
-    const db = mockDb();
-    const record = db[payload.email];
-    if (!record || record.code !== payload.code) {
-      return { ok: false, data: { error: t('err_code_invalid') } };
-    }
-    record.verified = true;
-    saveMockDb(db);
-    const token = 'mock_' + Math.random().toString(36).slice(2, 14);
-    return { ok: true, data: { token, user: { id: record.id, name: record.name, email: record.email } } };
+    return { ok: false, data: { error: t('err_connection') } };
   }
 
   async function callAuthApi(action, payload) {
-    if (MOCK_MODE) {
-      if (action === 'request-code') return mockRequestCode(payload, 'register');
-      if (action === 'verify-code') return mockVerifyCode(payload);
-    }
-    const res = await fetch(`${API_BASE}/${action}`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(payload),
-    });
+    if (MOCK_MODE) return mockApi(action, payload);
+    const res = await fetch(`${API_BASE}/${action}`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
     const data = await res.json();
     return { ok: res.ok, data };
   }
-  // ── /TEST MODU ─────────────────────────────────────────────────────
 
-  const form = document.getElementById('registerForm');
-  const nameInput = document.getElementById('name');
-  const emailInput = document.getElementById('email');
-  const codeGroup = document.getElementById('codeGroup');
-  const codeInput = document.getElementById('code');
-  const termsRow = document.getElementById('termsRow');
-  const termsCheckbox = document.getElementById('terms');
-  const submitBtn = document.getElementById('submitBtn');
-  const errorEl = document.getElementById('formError');
-  const verifyBox = document.getElementById('verifyBox');
+  const $ = id => document.getElementById(id);
+  const form = $('registerForm'), nameInput = $('name'), emailInput = $('email');
+  const passwordInput = $('password'), password2Input = $('password2'), pwBlock = $('pwBlock');
+  const codeGroup = $('codeGroup'), codeInput = $('code'), termsRow = $('termsRow'), termsCheckbox = $('terms');
+  const submitBtn = $('submitBtn'), errorEl = $('formError'), verifyBox = $('verifyBox');
+  let step = 'details';
 
-  let step = 'details'; // 'details' -> kod iste, 'code' -> kodu doğrula
-
-  // Basit ön-uç doğrulama simülasyonu: gerçek bot/insan doğrulaması
-  // sunucu tarafında ayrı bir servisle (örn. Turnstile/hCaptcha) yapılmalı.
   setTimeout(() => {
     verifyBox.innerHTML = `<div style="color:#7FAE8C;font-size:16px;">✓</div><div class="verify-label">${t('verified_text')}</div>`;
     submitBtn.disabled = false;
   }, 1400);
 
-  function showError(message) {
-    errorEl.textContent = message;
-    errorEl.style.display = 'block';
-  }
-
-  function clearError() {
-    errorEl.style.display = 'none';
-  }
+  function showError(m) { errorEl.textContent = m; errorEl.style.display = 'block'; }
+  function clearError() { errorEl.style.display = 'none'; }
 
   form.addEventListener('submit', async function (e) {
     e.preventDefault();
     clearError();
 
-    if (step === 'details' && !termsCheckbox.checked) {
-      showError(t('err_terms'));
-      return;
+    if (step === 'details') {
+      const problem = checkPassword(passwordInput.value, emailInput.value);
+      if (problem) { showError(problem); return; }
+      if (passwordInput.value !== password2Input.value) { showError(t('err_password_mismatch')); return; }
+      if (!termsCheckbox.checked) { showError(t('err_terms')); return; }
     }
 
     submitBtn.disabled = true;
-
     try {
       if (step === 'details') {
         const { ok, data } = await callAuthApi('request-code', {
-          email: emailInput.value,
-          name: nameInput.value,
-          termsAccepted: termsCheckbox.checked,
+          email: emailInput.value, name: nameInput.value, password: passwordInput.value, termsAccepted: termsCheckbox.checked,
         });
-
-        if (!ok) {
-          showError(data.error || t('err_code_send_failed'));
-          return;
-        }
-
+        if (!ok) { showError(data.error || t('err_code_send_failed')); return; }
         step = 'code';
-        nameInput.disabled = true;
-        emailInput.disabled = true;
-        termsRow.style.display = 'none';
+        nameInput.disabled = true; emailInput.disabled = true;
+        pwBlock.style.display = 'none'; termsRow.style.display = 'none';
         codeGroup.style.display = 'block';
         submitBtn.textContent = t('btn_verify_code');
         codeInput.focus();
       } else {
-        const { ok, data } = await callAuthApi('verify-code', {
-          email: emailInput.value,
-          code: codeInput.value,
-        });
-
-        if (!ok) {
-          showError(data.error || t('err_code_verify_failed'));
-          return;
-        }
-
-        // Oturum token'ını ve kullanıcı bilgisini sakla, yönlendir.
+        const { ok, data } = await callAuthApi('verify-code', { email: emailInput.value, code: codeInput.value });
+        if (!ok) { showError(data.error || t('err_code_verify_failed')); return; }
         localStorage.setItem('saturnpay_token', data.token);
         localStorage.setItem('saturnpay_user', JSON.stringify(data.user));
         window.location.href = 'dashboard.html';
@@ -780,6 +831,7 @@
   });
 
   applyLang();
+  wirePwToggles();
 </script>
 
 </body>
