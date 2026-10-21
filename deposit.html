@@ -500,7 +500,12 @@
     </div>
   </div>
 
-  <div class="card" id="simCard">
+  <div class="card" id="feeCard">
+    <div class="sim-title" data-i18n="depFeeTitle">Deposit fee: 2%</div>
+    <p style="font-size:13px;line-height:1.6;color:var(--text-dim);text-align:center;margin:0;" data-i18n="depFeeText"></p>
+  </div>
+
+  <div class="card" id="simCard" style="display:none;">
     <div class="sim-title" data-i18n="simTitle">Enter the Amount You Sent</div>
 
     <form id="depositForm" class="form-body" novalidate>
@@ -572,6 +577,7 @@
     en: {
       backToDashboard: 'Back to Dashboard', pageTitle: 'Deposit USDT', pageDesc: 'Send USDT from your crypto wallet.',
       currentBalance: 'Current Balance', depositAddress: 'Deposit Address',
+      depFeeTitle: 'Deposit fee: 2%', depFeeText: 'Just send USDT to the address above. Your balance is credited automatically after the network confirmations. A 2% deposit fee is deducted from the amount received.',
       tronLowFee: 'Tron · low fee', ethereum: 'Ethereum', qrAlt: 'Deposit address QR code', copy: 'Copy', copied: 'Copied',
       warnBefore: 'Only send USDT via the', warnAfter: 'network. Sending on a different network or asset may result in permanent loss of funds.',
       minDeposit: 'Min. deposit', requiredConfirmations: 'Required confirmations',
@@ -587,6 +593,7 @@
     tr: {
       backToDashboard: 'Panele Dön', pageTitle: 'USDT Yatır', pageDesc: 'Kripto cüzdanınızdan USDT gönderin.',
       currentBalance: 'Mevcut Bakiye', depositAddress: 'Yatırma Adresi',
+      depFeeTitle: 'Yatırma ücreti: %2', depFeeText: 'Yukarıdaki adrese USDT göndermeniz yeterli. Ağ onaylarından sonra bakiyeniz otomatik olarak güncellenir. Gelen tutardan %2 yatırma ücreti düşülür.',
       tronLowFee: 'Tron · düşük ücret', ethereum: 'Ethereum', qrAlt: 'Yatırma adresi QR kodu', copy: 'Kopyala', copied: 'Kopyalandı',
       warnBefore: 'Yalnızca', warnAfter: "ağı üzerinden USDT gönderin. Farklı bir ağ veya farklı bir varlık gönderirseniz fonlarınız kalıcı olarak kaybolabilir.",
       minDeposit: 'Min. yatırma', requiredConfirmations: 'Gerekli onay',
@@ -602,6 +609,7 @@
     ru: {
       backToDashboard: 'Назад в панель', pageTitle: 'Пополнить USDT', pageDesc: 'Отправьте USDT из своего криптокошелька.',
       currentBalance: 'Текущий баланс', depositAddress: 'Адрес для пополнения',
+      depFeeTitle: 'Комиссия за пополнение: 2%', depFeeText: 'Просто отправьте USDT на адрес выше. Баланс пополнится автоматически после подтверждений сети. Из полученной суммы удерживается комиссия за пополнение 2%.',
       tronLowFee: 'Tron · низкая комиссия', ethereum: 'Ethereum', qrAlt: 'QR-код адреса пополнения', copy: 'Копировать', copied: 'Скопировано',
       warnBefore: 'Отправляйте USDT только через сеть', warnAfter: '. Отправка через другую сеть или актив может привести к безвозвратной потере средств.',
       minDeposit: 'Мин. депозит', requiredConfirmations: 'Требуется подтверждений',
@@ -617,6 +625,7 @@
     es: {
       backToDashboard: 'Volver al Panel', pageTitle: 'Depositar USDT', pageDesc: 'Envía USDT desde tu billetera cripto.',
       currentBalance: 'Saldo Actual', depositAddress: 'Dirección de Depósito',
+      depFeeTitle: 'Comisión de depósito: 2%', depFeeText: 'Solo envía USDT a la dirección de arriba. Tu saldo se acredita automáticamente tras las confirmaciones de la red. Se descuenta una comisión del 2% del monto recibido.',
       tronLowFee: 'Tron · comisión baja', ethereum: 'Ethereum', qrAlt: 'Código QR de la dirección de depósito', copy: 'Copiar', copied: 'Copiado',
       warnBefore: 'Envía USDT solo a través de la red', warnAfter: '. Enviar por una red o activo diferente puede causar la pérdida permanente de tus fondos.',
       minDeposit: 'Depósito mín.', requiredConfirmations: 'Confirmaciones requeridas',
@@ -632,6 +641,7 @@
     fr: {
       backToDashboard: 'Retour au Tableau de Bord', pageTitle: 'Déposer des USDT', pageDesc: 'Envoyez des USDT depuis votre portefeuille crypto.',
       currentBalance: 'Solde Actuel', depositAddress: 'Adresse de Dépôt',
+      depFeeTitle: 'Frais de dépôt : 2 %', depFeeText: "Envoyez simplement des USDT à l'adresse ci-dessus. Votre solde est crédité automatiquement après les confirmations du réseau. Des frais de dépôt de 2 % sont déduits du montant reçu.",
       tronLowFee: 'Tron · frais faibles', ethereum: 'Ethereum', qrAlt: 'Code QR de l\'adresse de dépôt', copy: 'Copier', copied: 'Copié',
       warnBefore: "Envoyez uniquement de l'USDT via le réseau", warnAfter: ". L'envoi via un autre réseau ou actif peut entraîner une perte permanente de fonds.",
       minDeposit: 'Dépôt min.', requiredConfirmations: 'Confirmations requises',
@@ -647,6 +657,7 @@
     de: {
       backToDashboard: 'Zurück zum Dashboard', pageTitle: 'USDT Einzahlen', pageDesc: 'Senden Sie USDT von Ihrer Krypto-Wallet.',
       currentBalance: 'Aktuelles Guthaben', depositAddress: 'Einzahlungsadresse',
+      depFeeTitle: 'Einzahlungsgebühr: 2 %', depFeeText: 'Senden Sie einfach USDT an die obige Adresse. Ihr Guthaben wird nach den Netzwerkbestätigungen automatisch gutgeschrieben. Vom erhaltenen Betrag werden 2 % Einzahlungsgebühr abgezogen.',
       tronLowFee: 'Tron · niedrige Gebühr', ethereum: 'Ethereum', qrAlt: 'QR-Code der Einzahlungsadresse', copy: 'Kopieren', copied: 'Kopiert',
       warnBefore: 'Senden Sie USDT nur über das Netzwerk', warnAfter: '. Das Senden über ein anderes Netzwerk oder Asset kann zum dauerhaften Verlust Ihrer Gelder führen.',
       minDeposit: 'Min. Einzahlung', requiredConfirmations: 'Erforderliche Bestätigungen',
@@ -882,21 +893,28 @@
       return;
     }
 
+    const DEPOSIT_FEE = 0.02;
+    const net = Math.round(amt * (1 - DEPOSIT_FEE) * 100) / 100;
     const activeNetwork = networkTabs.querySelector('.network-tab.active').dataset.network;
     const activeNetworkLabel = NETWORK_LABEL[activeNetwork] || activeNetwork;
     transactions.push({
       id: makeId(),
-      description: 'USDT Deposit (' + activeNetworkLabel + ')',
-      amount: amt,
+      description: 'USDT Deposit (' + activeNetworkLabel + ') · 2% fee',
+      amount: net,
       date: new Date().toISOString(),
     });
     saveTransactions(transactions);
 
     confirmBtn.disabled = true;
-    successAmount.textContent = amt.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' USDT';
+    successAmount.textContent = net.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' USDT';
     form.classList.add('hidden');
     successState.classList.add('show');
   });
+
+  // Test-only simulator: visible only with ?test=1 (never shown to normal users)
+  if (!LIVE_MODE && /[?&]test=1/.test(location.search)) {
+    document.getElementById('simCard').style.display = '';
+  }
 
   // --- canlı mod: simülasyon kartını gizle, otomatik algılama durumunu göster ---
   if (LIVE_MODE) {
