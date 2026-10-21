@@ -91,6 +91,7 @@
   .more{ display:block; width:100%; margin-top:10px; padding:10px; border:1px solid var(--line); border-radius:9px; background:transparent;
     color:var(--text-dim); font-size:12.5px; cursor:pointer; font-family:'Inter',sans-serif; }
 </style>
+<script src="saturnpay-config.js"></script>
 </head>
 <body>
 <div class="wrap">
@@ -175,7 +176,7 @@
   // örnek: 'https://saturn-pay-backend-production.up.railway.app/api'
   // Boş bırakılırsa panel ÖRNEK VERİ gösterir (gerçek kullanıcı yok).
   // ───────────────────────────────────────────────────────────────
-  const API_BASE = '';
+  const API_BASE = (window.SP && SP.live) ? SP.API + '/api' : '';
 
   // Sunucunun GET {API_BASE}/admin/stats yanıtı şu biçimde olmalı
   // (sadece yönetici e-postasına verilir, aksi halde 401/403 döner):

@@ -222,6 +222,7 @@
   .done-row .p{ font-family:'IBM Plex Mono',monospace; color:var(--good); font-size:13px; }
   .done-wrap{ background:linear-gradient(175deg, var(--card-2), var(--card)); border:1px solid var(--line-soft); border-radius:14px; padding:4px 18px; }
 </style>
+<script src="saturnpay-config.js"></script>
 </head>
 <body>
 
@@ -607,6 +608,7 @@
   function saveInvestments(a) { localStorage.setItem(INV_KEY, JSON.stringify(a)); }
   // Credits principal + profit for plans whose end time has passed. Returns true if anything changed.
   function settleMatured() {
+    if (window.SP && SP.live) return false; // server settles in live mode
     const invs = loadInvestments();
     let txs; try { txs = JSON.parse(localStorage.getItem(TX_KEY) || '[]'); } catch (e) { txs = []; }
     const now = Date.now();
@@ -708,6 +710,17 @@
     if (a < activePlan.min) { errEl.textContent = t('errMin'); return; }
     if (a > activePlan.max) { errEl.textContent = t('errMax'); return; }
     if (a > balance()) { errEl.textContent = t('errBalance'); return; }
+
+    if (window.SP && SP.live) {
+      const btn = document.getElementById('confirmBtn'); btn.disabled = true;
+      SP.call('/api/invest', { planId: activePlan.id, amount: a }).then(() => {
+        SP.sync();
+        document.getElementById('sheetForm').style.display = 'none';
+        document.getElementById('sheetOk').style.display = 'block';
+        document.getElementById('balanceVal').textContent = formatUSD(balance());
+      }).catch(err => { errEl.textContent = err.message; }).finally(() => { btn.disabled = false; });
+      return;
+    }
 
     const now = Date.now();
     const profit = round2(a * activePlan.daily / 100 * activePlan.days);

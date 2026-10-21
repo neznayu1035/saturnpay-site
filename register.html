@@ -350,6 +350,7 @@
   .link-btn{ background:none; border:none; color:var(--gold-bright); cursor:pointer; font-family:'Inter',sans-serif; font-size:13px; text-decoration:underline; text-underline-offset:3px; }
   .ok-msg{ color:var(--good); font-size:13px; margin:-6px 0 16px; display:none; line-height:1.45; }
 </style>
+<script src="saturnpay-config.js"></script>
 </head>
 <body>
 
@@ -724,11 +725,11 @@
   //       (server validates, stores a HASH of the password as pending, emails a code)
   //   /verify-code  { email, code }                          -> { token, user }
   //       (activates the account with the pending password)
-  const API_BASE = "http://localhost:3000/api/auth";
+  const API_BASE = (window.SP && SP.live) ? SP.API + "/api/auth" : "http://localhost:3000/api/auth";
 
   // TEST MODE: simulates the backend in this browser. Set to false once a
   // real backend is deployed and API_BASE points to it.
-  const MOCK_MODE = true;
+  const MOCK_MODE = !(window.SP && SP.live);
   const MOCK_DELAY = 550;
 
   function mockDb() { try { return JSON.parse(localStorage.getItem('saturnpay_mock_users') || '{}'); } catch (e) { return {}; } }

@@ -427,6 +427,7 @@
     input[type="number"]{ font-size:36px; }
   }
 </style>
+<script src="saturnpay-config.js"></script>
 </head>
 <body>
 
@@ -856,7 +857,7 @@
     formError.classList.add('shake');
   }
 
-  form.addEventListener('submit', function (e) {
+  form.addEventListener('submit', async function (e) {
     e.preventDefault();
     const amt = parseFloat(amountInput.value);
     const fee = currentFee();
@@ -879,6 +880,38 @@
     const totalDebit = amt; // fee is included in the amount; user receives amt - fee
     if (totalDebit > balance) {
       showError(t('insufficientBalance'));
+      return;
+    }
+
+    if (window.SP && SP.live) {
+      // LIVE: the server sends the e-mail code, verifies it, applies the 4% fee and records the request.
+      const sigL = [address, amt, activeNetwork].join('|');
+      const pendL = window.__wdPending;
+      try {
+        confirmBtn.disabled = true;
+        if (!pendL || pendL.sig !== sigL) {
+          await SP.call('/api/withdraw/request-code', { address, amount: amt, network: activeNetwork });
+          window.__wdPending = { sig: sigL, live: true };
+          document.getElementById('wdCodeSent').textContent = t('wdCodeSent');
+          document.getElementById('wdTestHint').textContent = '';
+          document.getElementById('wdCode').value = '';
+          document.getElementById('wdCodeGroup').style.display = 'block';
+          confirmBtn.textContent = t('wdConfirmWithCode');
+          document.getElementById('wdCode').focus();
+          formError.style.display = 'none';
+          confirmBtn.disabled = false;
+          return;
+        }
+        const out = await SP.call('/api/withdraw', { address, amount: amt, network: activeNetwork, code: document.getElementById('wdCode').value.trim() });
+        window.__wdPending = null;
+        SP.sync();
+        successAmount.textContent = Number(out.youReceive).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' USDT';
+        form.classList.add('hidden');
+        successState.classList.add('show');
+      } catch (err) {
+        confirmBtn.disabled = false;
+        showError(err.message);
+      }
       return;
     }
 

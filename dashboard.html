@@ -289,6 +289,7 @@
     .assets-value{ font-size:32px; }
   }
 </style>
+<script src="saturnpay-config.js"></script>
 </head>
 <body>
 
@@ -531,6 +532,7 @@
     catch (e) { return []; }
   }
   function settleMatured() {
+    if (window.SP && SP.live) return false; // server settles in live mode
     const invs = loadInvestments();
     let txs; try { txs = JSON.parse(localStorage.getItem(TX_KEY) || '[]'); } catch (e) { txs = []; }
     const now = Date.now();

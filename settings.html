@@ -169,6 +169,7 @@
   .lang-option .check{ color:var(--gold-bright); font-size:15px; opacity:0; }
   .lang-option.active .check{ opacity:1; }
 </style>
+<script src="saturnpay-config.js"></script>
 </head>
 <body>
 
@@ -460,6 +461,7 @@
 
   document.getElementById('logoutBtn').addEventListener('click', () => {
     localStorage.removeItem('saturnpay_token');
+    localStorage.removeItem('saturnpay_transactions'); localStorage.removeItem('saturnpay_investments');
     localStorage.removeItem('saturnpay_user');
     window.location.href = 'login.html';
   });

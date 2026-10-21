@@ -437,6 +437,7 @@
     input[type="number"]{ font-size:36px; }
   }
 </style>
+<script src="saturnpay-config.js"></script>
 </head>
 <body>
 
@@ -565,7 +566,7 @@
   // URL'i buraya yapıştır, örn: 'https://senin-projen.up.railway.app'
   // Boş bırakırsan sayfa öncekiyle aynı şekilde, tamamen yerel/demo
   // modda çalışmaya devam eder.
-  const API_BASE_URL = '';
+  const API_BASE_URL = (window.SP && SP.live) ? SP.API : '';
 
   // ---------------------------------------------------------------
   // Çeviriler — deposit.html
@@ -756,7 +757,7 @@
       ...opts,
       headers: {
         'Content-Type': 'application/json',
-        'x-user-id': userId,
+        'Authorization': 'Bearer ' + ((window.SP && SP.token()) || ''),
         ...(opts.headers || {}),
       },
     });
