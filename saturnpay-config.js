@@ -47,5 +47,11 @@
       localStorage.setItem('saturnpay_investments', JSON.stringify(v.ok && Array.isArray(v.data) ? v.data : []));
     } catch (e) {}
   };
+  // LIVE mode: hide the "demo / test" notices (they are only true in test mode).
+  if (SP.live) {
+    var st = document.createElement('style');
+    st.textContent = '[data-i18n="demoNote"],[data-i18n="demoNoteText"],#fastNote{display:none !important}';
+    (document.head || document.documentElement).appendChild(st);
+  }
   SP.sync();
 })();
