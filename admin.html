@@ -90,6 +90,30 @@
   .empty{ color:var(--text-dim); font-size:13px; text-align:center; padding:22px 0; }
   .more{ display:block; width:100%; margin-top:10px; padding:10px; border:1px solid var(--line); border-radius:9px; background:transparent;
     color:var(--text-dim); font-size:12.5px; cursor:pointer; font-family:'Inter',sans-serif; }
+
+  .search{ width:100%; margin-bottom:12px; padding:10px 12px; border-radius:9px; border:1px solid var(--line); background:var(--field);
+    color:var(--text); font-size:13px; font-family:'Inter',sans-serif; outline:none; }
+  .search:focus{ border-color:var(--gold-dim); }
+  .row.clickable{ cursor:pointer; }
+  .badge{ display:inline-block; font-size:10.5px; padding:2px 8px; border-radius:999px; margin-left:8px; vertical-align:middle; }
+  .badge.blocked{ background:rgba(201,119,87,0.14); color:var(--bad); border:1px solid rgba(201,119,87,0.45); }
+  .badge.admin{ background:rgba(212,175,55,0.10); color:var(--gold-bright); border:1px solid var(--gold-dim); }
+  .manage{ padding:12px 0 14px; border-top:1px dashed var(--line); }
+  .manage .acts{ display:flex; flex-wrap:wrap; gap:8px; }
+  .abtn{ font-size:12.5px; padding:8px 14px; border-radius:9px; border:1px solid var(--line); background:var(--field); color:var(--text);
+    cursor:pointer; font-family:'Inter',sans-serif; }
+  .abtn.good{ border-color:rgba(127,174,140,0.5); color:var(--good); }
+  .abtn.warn{ border-color:var(--gold-dim); color:var(--gold-bright); }
+  .abtn.bad{ border-color:rgba(201,119,87,0.5); color:var(--bad); }
+  .abtn:disabled{ opacity:.5; cursor:default; }
+  .mform{ display:flex; flex-wrap:wrap; gap:8px; margin-top:10px; }
+  .mform input{ flex:1 1 120px; min-width:0; padding:9px 11px; border-radius:9px; border:1px solid var(--line); background:var(--field);
+    color:var(--text); font-size:13px; font-family:'Inter',sans-serif; outline:none; }
+  .mform input:focus{ border-color:var(--gold-dim); }
+  .mnote{ font-size:11.5px; color:var(--text-faint); margin-top:8px; line-height:1.5; }
+  .toast{ position:fixed; left:50%; bottom:22px; transform:translateX(-50%); max-width:90%; padding:11px 16px; border-radius:10px; font-size:13px;
+    background:var(--card-2); border:1px solid var(--gold-dim); color:var(--gold-bright); z-index:50; display:none; }
+  .toast.err{ border-color:var(--bad); color:var(--bad); }
 </style>
 <script src="saturnpay-config.js"></script>
 </head>
@@ -164,11 +188,13 @@
       <button class="tab" data-sort="balance">En çok bakiye</button>
       <button class="tab" data-sort="new">Yeni kayıt</button>
     </div>
+    <input class="search" id="userSearch" type="search" placeholder="E-posta ile ara…" autocomplete="off">
     <div id="userList"></div>
     <button class="more" id="moreUsers" style="display:none;">Daha fazla göster</button>
   </div>
 
 </div>
+<div class="toast" id="toast"></div>
 
 <script>
   // ───────────────────────────────────────────────────────────────
@@ -260,7 +286,7 @@
   }
 
   // ── Hesaplama ───────────────────────────────────────────────────
-  let DATA = null, sortKey = 'active', dueShown = 8, usersShown = 8;
+  let DATA = null, sortKey = 'active', dueShown = 8, usersShown = 8, openId = null, form = null;
 
   function compute() {
     const users = DATA.users || [];
@@ -365,18 +391,91 @@
     else if (sortKey === 'invested') list.sort((a, b) => (c.investedBy[b.email] || 0) - (c.investedBy[a.email] || 0));
     else if (sortKey === 'balance') list.sort((a, b) => (b.balance || 0) - (a.balance || 0));
     else list.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+    const q = (document.getElementById('userSearch').value || '').trim().toLowerCase();
+    const shown = q ? list.filter(u => u.email.toLowerCase().includes(q)) : list;
     const uEl = document.getElementById('userList');
-    uEl.innerHTML = list.length === 0 ? '<div class="empty">Henüz kullanıcı yok.</div>' :
-      list.slice(0, usersShown).map(u => {
+    const cap = q ? 50 : usersShown;
+    uEl.innerHTML = shown.length === 0 ? '<div class="empty">' + (q ? 'Eşleşen kullanıcı yok.' : 'Henüz kullanıcı yok.') + '</div>' :
+      shown.slice(0, cap).map(u => {
         const inv = c.investedBy[u.email] || 0;
-        return `<div class="row">
-          <div class="who"><div class="em">${esc(u.email)}</div>
+        const blocked = u.status === 'blocked';
+        const badge = u.isAdmin ? '<span class="badge admin">yönetici</span>' : blocked ? '<span class="badge blocked">engelli</span>' : '';
+        const open = openId === u.id;
+        return `<div class="urow" data-id="${esc(u.id)}">
+        <div class="row clickable" data-toggle="${esc(u.id)}">
+          <div class="who"><div class="em">${esc(u.email)}${badge}</div>
             <div class="meta">${u.lastLoginAt ? 'aktif: ' + esc(ago(lastMs(u))) : 'hiç giriş yok'} · ${u.txCount || 0} işlem</div></div>
           <div class="amt">${fmtUSD((u.balance || 0) + inv)}<small>yatırım ${esc(fmtUSD(inv))} · boşta ${esc(fmtUSD(u.balance))}</small></div>
-        </div>`;
+        </div>${open ? manageHtml(u, blocked) : ''}</div>`;
       }).join('');
-    document.getElementById('moreUsers').style.display = list.length > usersShown ? 'block' : 'none';
+    document.getElementById('moreUsers').style.display = (!q && list.length > usersShown) ? 'block' : 'none';
   }
+
+
+  // ── Hesap yönetimi ─────────────────────────────────────────────
+  function manageHtml(u, blocked) {
+    if (u.isAdmin) return '<div class="manage"><div class="mnote">Yönetici hesapları buradan değiştirilemez.</div></div>';
+    const f = form && form.id === u.id ? form : null;
+    return `<div class="manage" data-id="${esc(u.id)}">
+      <div class="acts">
+        <button class="abtn good" data-act="bonus">+ Bonus ekle</button>
+        <button class="abtn warn" data-act="deduct">− Bakiye düş</button>
+        ${blocked ? '<button class="abtn good" data-act="unblock">Engeli kaldır</button>' : '<button class="abtn warn" data-act="block">Engelle</button>'}
+        <button class="abtn bad" data-act="delete">Hesabı sil</button>
+      </div>
+      ${f ? `<div class="mform">
+        <input id="mfAmt" type="text" inputmode="decimal" placeholder="Tutar (USDT)" value="${esc(f.amount || '')}">
+        <input id="mfNote" type="text" maxlength="120" placeholder="Not (isteğe bağlı)" value="${esc(f.note || '')}">
+        <button class="abtn ${f.type === 'bonus' ? 'good' : 'warn'}" data-act="submit">${f.type === 'bonus' ? 'Bonusu ekle' : 'Bakiyeden düş'}</button>
+      </div>` : ''}
+      <div class="mnote">Bonus, kullanıcının bakiyesine eklenir ve çekilebilir. Engellenen kullanıcı giriş yapamaz; süresi dolan yatırımları yine de kendi hesabına yatar.
+      Silmek için bakiye 0 olmalı, aktif yatırım ve bekleyen çekim olmamalı.</div>
+    </div>`;
+  }
+  function toast(msg, err) {
+    const t = document.getElementById('toast');
+    t.textContent = msg; t.className = 'toast' + (err ? ' err' : ''); t.style.display = 'block';
+    clearTimeout(toast._t); toast._t = setTimeout(() => { t.style.display = 'none'; }, 3800);
+  }
+  async function adminCall(path, method, body) {
+    const token = localStorage.getItem('saturnpay_token');
+    const res = await fetch(`${API_BASE}/admin${path}`, { method, headers: { 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json' }, body: body ? JSON.stringify(body) : undefined });
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok) throw new Error(data.error || ('Hata ' + res.status));
+    return data;
+  }
+  async function runAction(id, act) {
+    if (!API_BASE) { toast('Örnek veri: bu işlemler sunucu bağlanınca çalışır.', true); return; }
+    const u = (DATA.users || []).find(x => x.id === id); if (!u) return;
+    try {
+      if (act === 'bonus' || act === 'deduct') { form = { id, type: act, amount: '', note: '' }; render(); const a = document.getElementById('mfAmt'); if (a) a.focus(); return; }
+      if (act === 'submit') {
+        const amount = document.getElementById('mfAmt').value.trim().replace(',', '.');
+        const note = document.getElementById('mfNote').value.trim();
+        if (!/^\d{1,6}(\.\d{1,2})?$/.test(amount) || parseFloat(amount) <= 0) { toast('Geçerli bir tutar yazın (örn. 25 veya 12.50).', true); return; }
+        const verb = form.type === 'bonus' ? 'eklensin' : 'düşülsün';
+        if (!confirm(`${u.email}\n${fmtUSD(parseFloat(amount))} ${verb} mi?`)) return;
+        const r = await adminCall(`/users/${id}/${form.type}`, 'POST', { amount, note });
+        toast(`Tamam. Yeni boşta bakiye: ${fmtUSD(r.balance)}`); form = null;
+      } else if (act === 'block') {
+        if (!confirm(`${u.email} engellensin mi? Giriş yapamaz ve işlem yapamaz.`)) return;
+        await adminCall(`/users/${id}/block`, 'POST', {}); toast('Kullanıcı engellendi.');
+      } else if (act === 'unblock') {
+        await adminCall(`/users/${id}/unblock`, 'POST', {}); toast('Engel kaldırıldı.');
+      } else if (act === 'delete') {
+        if (!confirm(`${u.email} hesabı SİLİNSİN mi? Bu geri alınamaz.`)) return;
+        await adminCall(`/users/${id}`, 'DELETE'); toast('Hesap silindi.'); openId = null;
+      }
+      const d = await loadData(); if (d) { DATA = d; render(); }
+    } catch (e) { toast(e.message || 'İşlem başarısız.', true); }
+  }
+  document.getElementById('userList').addEventListener('click', e => {
+    const b = e.target.closest('[data-act]');
+    if (b) { runAction(b.closest('.manage').dataset.id, b.dataset.act); return; }
+    const t = e.target.closest('[data-toggle]');
+    if (t) { const id = t.dataset.toggle; openId = openId === id ? null : id; form = null; render(); }
+  });
+  document.getElementById('userSearch').addEventListener('input', () => render());
 
   document.getElementById('userTabs').addEventListener('click', e => {
     const b = e.target.closest('.tab'); if (!b) return;

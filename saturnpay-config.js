@@ -21,7 +21,7 @@
     return fetch(SP.API + path, { method: method || (body === undefined ? 'GET' : 'POST'), headers: headers, body: body === undefined ? undefined : JSON.stringify(body) })
       .then(function (res) {
         return res.json().catch(function () { return {}; }).then(function (data) {
-          if (res.status === 401 && tk) { logout(); }
+          if ((res.status === 401 || (res.status === 403 && data.code === 'blocked')) && tk) { logout(); }
           if (!res.ok) throw new Error(data.error || ('Error ' + res.status));
           return data;
         });
@@ -38,7 +38,7 @@
       x.open('GET', SP.API + path, false);
       x.setRequestHeader('Authorization', 'Bearer ' + tk);
       try { x.send(); } catch (e) { return { ok: false }; }
-      if (x.status === 401) { logout(); return { ok: false }; }
+      if (x.status === 401 || x.status === 403) { logout(); return { ok: false }; }
       try { return { ok: x.status === 200, data: JSON.parse(x.responseText) }; } catch (e) { return { ok: false }; }
     }
     var t = get('/api/transactions'), v = get('/api/investments');
