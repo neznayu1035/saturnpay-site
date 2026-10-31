@@ -4,7 +4,7 @@
  *   API = 'https://your-app.up.railway.app'    -> LIVE MODE (real backend; no trailing slash, no /api)
  */
 (function () {
-  var API = '';
+  var API = 'https://api.saturnpays.com';
 
   var SP = window.SP = { API: API.replace(/\/+$/, ''), live: !!API };
   SP.token = function () { try { return localStorage.getItem('saturnpay_token') || ''; } catch (e) { return ''; } };
