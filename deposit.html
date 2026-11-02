@@ -443,7 +443,7 @@
 <link rel="shortcut icon" href="favicon.ico">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
 <link rel="manifest" href="site.webmanifest">
-<meta name="theme-color" content="#0B0D12">
+<meta name="theme-color" content="#0A0A0A">
 </head>
 <body>
 
@@ -595,7 +595,7 @@
       liveStatusDefault: 'USDT sent to this address will be automatically detected and added to your balance.',
       lastChecked: 'Last checked', justDeposited: 'Just deposited', connectionError: 'connection error',
       demoNoteText: 'Balance and transactions are stored only in this browser; they are not connected to a real blockchain network or wallet. This section simulates the deposit locally for testing purposes.',
-      addressLoading: 'Fetching address...', addressError: 'Could not fetch address, check backend URL/network connection.',
+      addressLoading: 'Fetching address...', addressError: 'Deposit address is temporarily unavailable. Please try again shortly.',
     },
     tr: {
       backToDashboard: 'Panele Dön', pageTitle: 'USDT Yatır', pageDesc: 'Kripto cüzdanınızdan USDT gönderin.',
@@ -611,7 +611,7 @@
       liveStatusDefault: 'Adrese gelecek USDT otomatik olarak algılanıp bakiyenize eklenecek.',
       lastChecked: 'Son kontrol', justDeposited: 'Az önce yatırıldı', connectionError: 'bağlantı hatası',
       demoNoteText: 'Bakiye ve işlemler yalnızca bu tarayıcıda saklanır; gerçek bir blok zinciri ağına veya cüzdana bağlı değildir. Bu alan test amacıyla yatırma işlemini yerel olarak simüle eder.',
-      addressLoading: 'Adres alınıyor...', addressError: 'Adres alınamadı, backend URL/ağ bağlantısını kontrol edin.',
+      addressLoading: 'Adres alınıyor...', addressError: 'Yatırım adresi şu anda alınamıyor. Lütfen biraz sonra tekrar deneyin.',
     },
     ru: {
       backToDashboard: 'Назад в панель', pageTitle: 'Пополнить USDT', pageDesc: 'Отправьте USDT из своего криптокошелька.',
@@ -627,7 +627,7 @@
       liveStatusDefault: 'USDT, отправленные на этот адрес, будут автоматически обнаружены и добавлены к вашему балансу.',
       lastChecked: 'Последняя проверка', justDeposited: 'Только что внесено', connectionError: 'ошибка соединения',
       demoNoteText: 'Баланс и транзакции хранятся только в этом браузере; они не связаны с реальной блокчейн-сетью или кошельком. Этот раздел локально симулирует депозит в тестовых целях.',
-      addressLoading: 'Получение адреса...', addressError: 'Не удалось получить адрес, проверьте URL backend/сетевое соединение.',
+      addressLoading: 'Получение адреса...', addressError: 'Адрес для пополнения временно недоступен. Повторите попытку позже.',
     },
     es: {
       backToDashboard: 'Volver al Panel', pageTitle: 'Depositar USDT', pageDesc: 'Envía USDT desde tu billetera cripto.',
@@ -643,7 +643,7 @@
       liveStatusDefault: 'El USDT enviado a esta dirección se detectará automáticamente y se añadirá a tu saldo.',
       lastChecked: 'Última comprobación', justDeposited: 'Depositado recién', connectionError: 'error de conexión',
       demoNoteText: 'El saldo y las transacciones se almacenan solo en este navegador; no están conectados a una red blockchain o billetera real. Esta sección simula el depósito localmente con fines de prueba.',
-      addressLoading: 'Obteniendo dirección...', addressError: 'No se pudo obtener la dirección, verifica la URL del backend/conexión de red.',
+      addressLoading: 'Obteniendo dirección...', addressError: 'La dirección de depósito no está disponible por ahora. Inténtalo de nuevo en unos minutos.',
     },
     fr: {
       backToDashboard: 'Retour au Tableau de Bord', pageTitle: 'Déposer des USDT', pageDesc: 'Envoyez des USDT depuis votre portefeuille crypto.',
@@ -659,7 +659,7 @@
       liveStatusDefault: "L'USDT envoyé à cette adresse sera automatiquement détecté et ajouté à votre solde.",
       lastChecked: 'Dernière vérification', justDeposited: "À l'instant déposé", connectionError: 'erreur de connexion',
       demoNoteText: "Le solde et les transactions sont stockés uniquement dans ce navigateur ; ils ne sont pas connectés à un réseau blockchain ou un portefeuille réel. Cette section simule le dépôt localement à des fins de test.",
-      addressLoading: 'Récupération de l\'adresse...', addressError: "Impossible de récupérer l'adresse, vérifiez l'URL du backend/la connexion réseau.",
+      addressLoading: 'Récupération de l\'adresse...', addressError: "L'adresse de dépôt est momentanément indisponible. Réessayez dans quelques instants.",
     },
     de: {
       backToDashboard: 'Zurück zum Dashboard', pageTitle: 'USDT Einzahlen', pageDesc: 'Senden Sie USDT von Ihrer Krypto-Wallet.',
@@ -675,7 +675,7 @@
       liveStatusDefault: 'An diese Adresse gesendetes USDT wird automatisch erkannt und Ihrem Guthaben hinzugefügt.',
       lastChecked: 'Zuletzt geprüft', justDeposited: 'Soeben eingezahlt', connectionError: 'Verbindungsfehler',
       demoNoteText: 'Guthaben und Transaktionen werden nur in diesem Browser gespeichert; sie sind nicht mit einem echten Blockchain-Netzwerk oder einer Wallet verbunden. Dieser Bereich simuliert die Einzahlung lokal zu Testzwecken.',
-      addressLoading: 'Adresse wird abgerufen...', addressError: 'Adresse konnte nicht abgerufen werden, prüfen Sie die Backend-URL/Netzwerkverbindung.',
+      addressLoading: 'Adresse wird abgerufen...', addressError: 'Die Einzahlungsadresse ist vorübergehend nicht verfügbar. Bitte versuchen Sie es in Kürze erneut.',
     },
   };
 
@@ -767,7 +767,7 @@
         ...(opts.headers || {}),
       },
     });
-    if (!res.ok) throw new Error('API error: ' + res.status);
+    if (!res.ok) { const e = new Error('API error: ' + res.status); e.status = res.status; throw e; }
     return res.json();
   }
 
@@ -809,7 +809,7 @@
           address = data.address;
           liveAddressCache[network] = address;
         } catch (err) {
-          addressText.textContent = t('addressError');
+          addressText.textContent = t('addressError') + (err && err.status ? ' (' + err.status + ')' : '');
           console.error(err);
           return;
         }
