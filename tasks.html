@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title id="pageTitleTag">Tasks — Saturn-Pay</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg: #06070A; --card: #12151C; --card-2: #181C25; --field: #14171F;
+    --line: #262B35; --line-soft: rgba(255,255,255,0.06);
+    --text: #EDEBE4; --text-dim: #8B93A4; --text-faint: #565E6E;
+    --gold: #D4AF37; --gold-bright: #F0CB6A; --gold-dim: #8C7222; --amber: #C98A4B;
+    --good: #7FAE8C; --bad: #C97757;
+  }
+  *{margin:0;padding:0;box-sizing:border-box;}
+  html{-webkit-font-smoothing:antialiased;}
+  body{ background:var(--bg); color:var(--text); font-family:'Inter',sans-serif; min-height:100vh; padding-bottom:78px; }
+  h1,h2{ font-family:'Inter',sans-serif; font-weight:500; }
+  a{ color:inherit; text-decoration:none; }
+
+  .topbar{
+    display:flex; align-items:center; justify-content:space-between;
+    padding:18px 20px 6px; max-width:520px; margin:0 auto;
+  }
+  .avatar-btn{
+    width:38px; height:38px; border-radius:50%;
+    background:linear-gradient(160deg, var(--card-2), var(--card));
+    border:1px solid var(--line);
+    display:flex; align-items:center; justify-content:center;
+    cursor:pointer; color:var(--text-dim);
+  }
+  .avatar-btn svg{ width:17px; height:17px; }
+  .avatar-btn:hover{ border-color:var(--gold-dim); }
+  .brand-mini{ font-size:15px; font-weight:600; color:var(--text-dim); letter-spacing:0.02em; }
+  .bell-btn{
+    width:38px; height:38px; border-radius:50%;
+    display:flex; align-items:center; justify-content:center;
+    color:var(--text-dim); background:transparent; border:none; cursor:pointer; position:relative;
+  }
+  .bell-btn svg{ width:19px; height:19px; }
+  .bell-dot{
+    position:absolute; top:7px; right:8px; width:7px; height:7px; border-radius:50%;
+    background:var(--gold-bright); box-shadow:0 0 6px rgba(240,203,106,0.7);
+  }
+
+  main{ max-width:520px; margin:0 auto; padding:14px 20px 40px; }
+
+  .page-head{ padding:8px 0 18px; }
+  .page-head h1{ font-size:21px; margin-bottom:4px; }
+  .page-head p{ color:var(--text-dim); font-size:13px; }
+
+  .hero-card{
+    background:linear-gradient(175deg, var(--card-2), var(--card));
+    border:1px solid var(--line-soft);
+    border-radius:14px;
+    padding:24px 22px;
+    position:relative;
+    overflow:hidden;
+    margin-bottom:16px;
+  }
+  .hero-card::before{
+    content:'';
+    position:absolute; top:-60%; right:-25%;
+    width:260px; height:260px;
+    background:radial-gradient(circle, rgba(212,175,55,0.12), transparent 70%);
+    pointer-events:none;
+  }
+  .bonus-pill{
+    display:inline-flex; align-items:center; gap:6px;
+    padding:5px 12px; border-radius:999px;
+    background:rgba(212,175,55,0.1); border:1px solid rgba(212,175,55,0.3);
+    color:var(--gold-bright); font-size:11.5px; font-family:'IBM Plex Mono',monospace;
+    margin-bottom:14px; position:relative;
+  }
+  .hero-card h2{ font-size:18px; margin-bottom:6px; position:relative; }
+  .hero-card p{ color:var(--text-dim); font-size:13px; line-height:1.6; margin-bottom:18px; position:relative; }
+
+  .code-row, .link-row{
+    display:flex; align-items:center; gap:10px;
+    padding:13px 14px; margin-bottom:10px;
+    background:var(--field); border:1px solid var(--line-soft); border-radius:9px;
+    position:relative;
+  }
+  .code-row .val{ font-family:'IBM Plex Mono',monospace; font-size:15px; color:var(--gold-bright); letter-spacing:0.04em; flex:1; }
+  .link-row .val{ font-family:'IBM Plex Mono',monospace; font-size:12px; color:var(--text-dim); flex:1; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .copy-btn{
+    flex-shrink:0; padding:7px 13px; border-radius:7px;
+    border:1px solid var(--line); background:transparent; color:var(--text-dim);
+    font-size:12px; font-weight:600; cursor:pointer;
+    transition:border-color .15s ease, color .15s ease, background .15s ease;
+  }
+  .copy-btn:hover{ border-color:var(--gold-dim); color:var(--text); }
+  .copy-btn.copied{ border-color:var(--good); color:var(--good); background:rgba(127,174,140,0.1); }
+
+  .share-btn{
+    width:100%; padding:13px; border-radius:999px;
+    border:none; cursor:pointer;
+    background:linear-gradient(135deg, var(--gold-bright), var(--gold));
+    color:#141008; font-size:13.5px; font-weight:600;
+    position:relative;
+  }
+
+  .stats-row{ display:flex; gap:12px; margin-bottom:16px; }
+  .stat-card{
+    flex:1; background:linear-gradient(175deg, var(--card-2), var(--card));
+    border:1px solid var(--line-soft); border-radius:12px; padding:16px;
+  }
+  .stat-card .n{ font-size:22px; font-weight:500; color:var(--text); }
+  .stat-card .l{ font-size:11px; color:var(--text-faint); margin-top:4px; }
+
+  .how-card{
+    background:linear-gradient(175deg, var(--card-2), var(--card));
+    border:1px solid var(--line-soft); border-radius:14px;
+    padding:18px 20px; margin-bottom:16px;
+  }
+  .how-card h3{ font-size:11px; color:var(--gold); font-family:'IBM Plex Mono',monospace; text-transform:uppercase; letter-spacing:0.08em; margin-bottom:14px; }
+  .how-step{ display:flex; gap:12px; padding:9px 0; }
+  .how-num{
+    width:22px; height:22px; border-radius:50%; flex-shrink:0;
+    background:rgba(212,175,55,0.12); color:var(--gold-bright);
+    display:flex; align-items:center; justify-content:center;
+    font-size:11px; font-family:'IBM Plex Mono',monospace;
+  }
+  .how-step p{ font-size:13px; color:var(--text-dim); line-height:1.5; }
+
+  .friends-card{
+    background:linear-gradient(175deg, var(--card-2), var(--card));
+    border:1px solid var(--line-soft); border-radius:14px; padding:20px 20px 8px;
+  }
+  .section-title{ font-size:11px; color:var(--gold); font-family:'IBM Plex Mono',monospace; text-transform:uppercase; letter-spacing:0.08em; margin-bottom:14px; }
+  .friend-row{ display:flex; align-items:center; justify-content:space-between; padding:13px 0; border-top:1px solid var(--line-soft); }
+  .friend-row:first-child{ border-top:none; }
+  .friend-name{ font-size:13.5px; color:var(--text); }
+  .friend-date{ font-size:11px; color:var(--text-faint); font-family:'IBM Plex Mono',monospace; margin-top:2px; }
+  .friend-bonus{ font-family:'IBM Plex Mono',monospace; font-size:13px; color:var(--good); }
+  .empty-note{ color:var(--text-dim); font-size:13px; text-align:center; padding:24px 0; line-height:1.6; }
+
+  .bottom-nav{
+    position:fixed; left:0; right:0; bottom:0; z-index:5;
+    background:rgba(10,12,17,0.92); backdrop-filter:blur(10px);
+    border-top:1px solid var(--line-soft); display:flex;
+  }
+  .nav-item{
+    flex:1; display:flex; flex-direction:column; align-items:center; gap:3px;
+    padding:11px 4px 9px; color:var(--text-faint); font-size:10.5px; cursor:pointer;
+    transition:color .15s ease;
+  }
+  .nav-item .icon svg{ width:21px; height:21px; display:block; }
+  .nav-item:hover{ color:var(--text-dim); }
+  .nav-item.active{ color:var(--gold-bright); }
+
+  .task{ background:linear-gradient(175deg, var(--card-2), var(--card)); border:1px solid var(--line-soft); border-radius:14px; padding:16px 18px; margin-bottom:12px; }
+  .task.is-done{ border-color:rgba(212,175,55,0.35); }
+  .task.is-claimed{ opacity:.65; }
+  .task-top{ display:flex; align-items:flex-start; justify-content:space-between; gap:12px; }
+  .task-title{ font-size:14px; line-height:1.4; color:var(--text); }
+  .task-reward{ flex-shrink:0; font-family:'IBM Plex Mono',monospace; font-size:13px; color:var(--gold-bright); background:rgba(212,175,55,0.1); border:1px solid rgba(212,175,55,0.3); border-radius:999px; padding:4px 10px; }
+  .bar{ height:6px; border-radius:99px; background:var(--field); overflow:hidden; margin:14px 0 8px; }
+  .bar > i{ display:block; height:100%; background:linear-gradient(90deg, var(--gold), var(--gold-bright)); border-radius:99px; }
+  .task-foot{ display:flex; align-items:center; justify-content:space-between; gap:10px; }
+  .task-prog{ font-family:'IBM Plex Mono',monospace; font-size:11.5px; color:var(--text-faint); }
+  .task-btn{ padding:8px 16px; border-radius:999px; border:1px solid var(--line); background:transparent; color:var(--text-dim); font-size:12.5px; font-weight:600; cursor:pointer; }
+  .task-btn.claim{ border:none; background:linear-gradient(135deg, var(--gold-bright), var(--gold)); color:#141008; }
+  .task-btn[disabled]{ opacity:.6; cursor:default; }
+  .task-msg{ margin:0 0 14px; padding:11px 14px; border-radius:9px; font-size:13px; display:none; }
+  .task-msg.ok{ display:block; background:rgba(127,174,140,0.1); border:1px solid rgba(127,174,140,0.35); color:var(--good); }
+  .task-msg.err{ display:block; background:rgba(201,119,87,0.1); border:1px solid rgba(201,119,87,0.35); color:var(--bad); }
+  .pin{ background:linear-gradient(175deg, var(--card-2), var(--card)); border:1px solid rgba(212,175,55,0.4); border-radius:14px; padding:16px 18px; margin-bottom:14px; box-shadow:0 0 0 1px rgba(212,175,55,0.05) inset; }
+  .pin-top{ display:flex; align-items:center; justify-content:space-between; gap:10px; }
+  .pin-label{ font-size:10.5px; color:var(--gold); font-family:'IBM Plex Mono',monospace; text-transform:uppercase; letter-spacing:0.08em; }
+  .pin-go{ width:34px; height:34px; border-radius:50%; border:1px solid var(--line); display:flex; align-items:center; justify-content:center; color:var(--text-dim); flex-shrink:0; }
+  .pin-go:hover{ border-color:var(--gold-dim); color:var(--gold-bright); }
+  .pin-go svg{ width:16px; height:16px; }
+  .pin-title{ font-size:14.5px; color:var(--text); margin:8px 0 2px; line-height:1.4; }
+  .pin-track{ position:relative; margin:22px 4px 8px; }
+  .pin-track .bar{ margin:0; height:6px; }
+  .pin-dot{ position:absolute; top:50%; width:14px; height:14px; border-radius:50%; background:var(--gold-bright); border:2px solid var(--bg); box-shadow:0 0 8px rgba(240,203,106,0.6); transform:translate(-50%,-50%); }
+  .pin-ends{ display:flex; justify-content:space-between; font-family:'IBM Plex Mono',monospace; font-size:11.5px; color:var(--text-faint); margin:0 2px; }
+  .pin-foot{ display:flex; align-items:center; justify-content:space-between; gap:10px; margin-top:10px; }
+  .sum-card{ display:flex; gap:12px; margin-bottom:16px; }
+</style>
+<script src="saturnpay-config.js"></script>
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<link rel="icon" href="favicon-32.png" type="image/png" sizes="32x32">
+<link rel="shortcut icon" href="favicon.ico">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="manifest" href="site.webmanifest">
+<meta name="theme-color" content="#0A0A0A">
+</head>
+<body>
+
+<div class="topbar">
+  <button class="avatar-btn" id="avatarBtn" data-i18n-title="settingsTitle" data-i18n-aria="settingsTitle" title="Settings" aria-label="Settings">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="3.5"/><path d="M4.5 20c1.3-3.5 4.2-5.5 7.5-5.5s6.2 2 7.5 5.5"/></svg>
+  </button>
+  <span class="brand-mini">Saturn-Pay</span>
+  <button class="bell-btn" id="bellBtn" data-i18n-title="notifications" data-i18n-aria="notifications" title="Notifications" aria-label="Notifications">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M6 10a6 6 0 0 1 12 0c0 3.2 1 4.8 1.6 5.6.3.4 0 1-.5 1H4.9c-.5 0-.8-.6-.5-1C5 14.8 6 13.2 6 10Z"/><path d="M9.5 19a2.6 2.6 0 0 0 5 0"/></svg>
+    <span class="bell-dot"></span>
+  </button>
+</div>
+
+<main>
+  <div class="page-head">
+    <h1 id="pageH1">Tasks</h1>
+    <p data-i18n="pageDesc">Complete tasks and receive a bonus on your balance.</p>
+  </div>
+  <div class="sum-card">
+    <div class="stat-card"><div class="n" id="doneCount">0</div><div class="l" data-i18n="completed">Completed</div></div>
+    <div class="stat-card"><div class="n" id="earnedTotal">$0.00</div><div class="l" data-i18n="earned">Earned</div></div>
+  </div>
+  <div class="task-msg" id="msg"></div>
+  <div class="pin" id="pinCard"></div>
+  <div id="taskList"></div>
+</main>
+
+<nav class="bottom-nav">
+  <a href="dashboard.html" class="nav-item">
+    <span class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11.5 12 4l9 7.5"/><path d="M5.5 9.5V19a1 1 0 0 0 1 1H9a1 1 0 0 0 1-1v-4.5a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1V19a1 1 0 0 0 1 1h2.5a1 1 0 0 0 1-1V9.5"/></svg></span><span data-i18n="navHome">Home</span>
+  </a>
+  <a href="investments.html" class="nav-item">
+    <span class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M3 17 9 11l4 4 8-8"/><path d="M14 6h7v7"/></svg></span><span data-i18n="navInvestments">Investments</span>
+  </a>
+  <a href="invests.html" class="nav-item">
+    <span class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="8" width="18" height="12" rx="2"/><path d="M8 8V6a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><path d="M3 13h18"/></svg></span><span data-i18n="navInvests">Invests</span>
+  </a>
+  <a href="tasks.html" class="nav-item active">
+    <span class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="4" width="16" height="16" rx="2.5"/><path d="m8.5 12.2 2.4 2.4 4.6-5"/></svg></span><span data-i18n="navTasks">Tasks</span>
+  </a>
+  <a href="assets.html" class="nav-item">
+    <span class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="6" width="18" height="13" rx="2"/><path d="M3 10h18"/><circle cx="16.5" cy="14.5" r="1.6"/></svg></span><span data-i18n="navAssets">Assets</span>
+  </a>
+</nav>
+
+<script>
+  const LANG_KEY = 'saturnpay_lang';
+  const translations = {"en": {"pageDesc": "Complete tasks and receive a bonus on your balance.", "completed": "Completed", "earned": "Earned", "reward": "Reward", "claim": "Claim", "claimed": "Claimed", "go": "Start", "depTitle": "Deposit {n} USDT in total", "invOne": "Make your first investment", "invN": "Make {n} investments", "ok": "Reward added to your balance.", "err": "Could not claim the reward. Try again.", "load": "Could not load tasks.", "inviteTitle": "Invite friends", "inviteDesc": "Share your invite link.", "open": "Open", "settingsTitle": "Settings", "notifications": "Notifications", "noNotifications": "You have no new notifications.", "pageTitle": "Tasks", "navTasks": "Tasks", "pinLabel": "Pinned task", "pinTitle": "Invite friends", "pinSub": "Friends who registered with your link", "pinAll": "All referral tasks completed 🎉", "friends": "friends"}, "tr": {"pageDesc": "Görevleri tamamla, bakiyene bonus kazan.", "completed": "Tamamlanan", "earned": "Kazanılan", "reward": "Ödül", "claim": "Ödülü al", "claimed": "Alındı", "go": "Başla", "depTitle": "Toplam {n} USDT yatır", "invOne": "İlk yatırımını yap", "invN": "{n} yatırım yap", "ok": "Ödül bakiyene eklendi.", "err": "Ödül alınamadı. Tekrar dene.", "load": "Görevler yüklenemedi.", "inviteTitle": "Arkadaş davet et", "inviteDesc": "Davet linkini paylaş.", "open": "Aç", "settingsTitle": "Ayarlar", "notifications": "Bildirimler", "noNotifications": "Yeni bildiriminiz yok.", "pageTitle": "Görevler", "navTasks": "Görevler", "pinLabel": "Sabit görev", "pinTitle": "Arkadaş davet et", "pinSub": "Linkinle siteye kayıt olan arkadaşlar", "pinAll": "Tüm davet görevleri tamamlandı 🎉", "friends": "arkadaş"}, "ru": {"pageDesc": "Выполняйте задания и получайте бонус на баланс.", "completed": "Выполнено", "earned": "Получено", "reward": "Награда", "claim": "Забрать", "claimed": "Получено", "go": "Начать", "depTitle": "Пополните на {n} USDT в сумме", "invOne": "Сделайте первую инвестицию", "invN": "Сделайте {n} инвестиции", "ok": "Награда добавлена на баланс.", "err": "Не удалось получить награду. Повторите.", "load": "Не удалось загрузить задания.", "inviteTitle": "Пригласите друзей", "inviteDesc": "Поделитесь ссылкой-приглашением.", "open": "Открыть", "settingsTitle": "Настройки", "notifications": "Уведомления", "noNotifications": "Новых уведомлений нет.", "pageTitle": "Задания", "navTasks": "Задания", "pinLabel": "Закреплённое задание", "pinTitle": "Пригласите друзей", "pinSub": "Друзья, зарегистрировавшиеся по вашей ссылке", "pinAll": "Все задания по приглашению выполнены 🎉", "friends": "друзей"}, "es": {"pageDesc": "Completa tareas y recibe un bono en tu saldo.", "completed": "Completadas", "earned": "Ganado", "reward": "Recompensa", "claim": "Reclamar", "claimed": "Reclamado", "go": "Empezar", "depTitle": "Deposita {n} USDT en total", "invOne": "Haz tu primera inversión", "invN": "Haz {n} inversiones", "ok": "Recompensa añadida a tu saldo.", "err": "No se pudo reclamar. Inténtalo de nuevo.", "load": "No se pudieron cargar las tareas.", "inviteTitle": "Invita a amigos", "inviteDesc": "Comparte tu enlace de invitación.", "open": "Abrir", "settingsTitle": "Ajustes", "notifications": "Notificaciones", "noNotifications": "No tienes notificaciones nuevas.", "pageTitle": "Tareas", "navTasks": "Tareas", "pinLabel": "Tarea fijada", "pinTitle": "Invita a amigos", "pinSub": "Amigos registrados con tu enlace", "pinAll": "Todas las tareas de invitación completadas 🎉", "friends": "amigos"}, "fr": {"pageDesc": "Accomplissez des missions et recevez un bonus sur votre solde.", "completed": "Terminées", "earned": "Gagné", "reward": "Récompense", "claim": "Récupérer", "claimed": "Récupérée", "go": "Commencer", "depTitle": "Déposez {n} USDT au total", "invOne": "Faites votre premier investissement", "invN": "Faites {n} investissements", "ok": "Récompense ajoutée à votre solde.", "err": "Impossible de récupérer la récompense. Réessayez.", "load": "Impossible de charger les missions.", "inviteTitle": "Invitez des amis", "inviteDesc": "Partagez votre lien d’invitation.", "open": "Ouvrir", "settingsTitle": "Paramètres", "notifications": "Notifications", "noNotifications": "Aucune nouvelle notification.", "pageTitle": "Missions", "navTasks": "Missions", "pinLabel": "Mission épinglée", "pinTitle": "Invitez des amis", "pinSub": "Amis inscrits avec votre lien", "pinAll": "Toutes les missions de parrainage terminées 🎉", "friends": "amis"}, "de": {"pageDesc": "Erledige Aufgaben und erhalte einen Bonus auf dein Guthaben.", "completed": "Erledigt", "earned": "Verdient", "reward": "Belohnung", "claim": "Abholen", "claimed": "Abgeholt", "go": "Starten", "depTitle": "Zahle insgesamt {n} USDT ein", "invOne": "Tätige deine erste Investition", "invN": "Tätige {n} Investitionen", "ok": "Belohnung deinem Guthaben gutgeschrieben.", "err": "Belohnung konnte nicht abgeholt werden. Erneut versuchen.", "load": "Aufgaben konnten nicht geladen werden.", "inviteTitle": "Freunde einladen", "inviteDesc": "Teile deinen Einladungslink.", "open": "Öffnen", "settingsTitle": "Einstellungen", "notifications": "Benachrichtigungen", "noNotifications": "Keine neuen Benachrichtigungen.", "pageTitle": "Aufgaben", "navTasks": "Aufgaben", "pinLabel": "Angepinnte Aufgabe", "pinTitle": "Freunde einladen", "pinSub": "Freunde, die sich mit deinem Link registriert haben", "pinAll": "Alle Einladungsaufgaben erledigt 🎉", "friends": "Freunde"}};
+  function getLang() { const l = localStorage.getItem(LANG_KEY) || 'en'; return translations[l] ? l : 'en'; }
+  function t(key) { return translations[getLang()][key]; }
+  function esc(s){ return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+  function usd(n){ return new Intl.NumberFormat('en-US',{style:'currency',currency:'USD'}).format(n); }
+
+  function applyLang() {
+    const dict = translations[getLang()];
+    document.documentElement.lang = getLang();
+    document.querySelectorAll('[data-i18n]').forEach(el => { const v = dict[el.getAttribute('data-i18n')]; if (v !== undefined) el.textContent = v; });
+    document.querySelectorAll('[data-i18n-title]').forEach(el => { const v = dict[el.getAttribute('data-i18n-title')]; if (v) el.title = v; });
+    document.querySelectorAll('[data-i18n-aria]').forEach(el => { const v = dict[el.getAttribute('data-i18n-aria')]; if (v) el.setAttribute('aria-label', v); });
+    document.getElementById('pageH1').textContent = dict.pageTitle;
+    document.getElementById('pageTitleTag').textContent = dict.pageTitle + ' — Saturn-Pay';
+  }
+
+  const token = localStorage.getItem('saturnpay_token');
+  if (!token) { window.location.href = 'login.html'; }
+  document.getElementById('avatarBtn').addEventListener('click', () => window.location.href = 'settings.html');
+  document.getElementById('bellBtn').addEventListener('click', () => alert(t('noNotifications')));
+
+  // Task definitions used in TEST mode only. In LIVE mode the server owns tasks, progress and rewards.
+  const LOCAL_TASKS = [
+    { id: 'first_deposit', type: 'deposit_total', target: 50,  reward: 1 },
+    { id: 'first_invest',  type: 'invest_count',  target: 1,   reward: 2 },
+    { id: 'deposit_200',   type: 'deposit_total', target: 200, reward: 3 },
+    { id: 'invest_3',      type: 'invest_count',  target: 3,   reward: 3 },
+    ...[[10,1],[20,1.1],[30,1.3],[40,1.4],[50,1.5],[100,2],[200,3],[300,4],[400,5],[500,6]].map(([n, r]) => ({ id: 'ref_' + n, type: 'referral_count', target: n, reward: r })),
+  ];
+  const TX_KEY = 'saturnpay_transactions', INV_KEY = 'saturnpay_investments', CLAIM_KEY = 'saturnpay_task_claims';
+  const jget = (k, d) => { try { const v = JSON.parse(localStorage.getItem(k) || 'null'); return v == null ? d : v; } catch (e) { return d; } };
+  function localList() {
+    const txs = jget(TX_KEY, []), invs = jget(INV_KEY, []), claims = jget(CLAIM_KEY, []);
+    const dep = txs.filter(x => x.amount > 0 && /deposit/i.test(x.description || '')).reduce((s, x) => s + x.amount, 0);
+    const prog = { deposit_total: dep, invest_count: invs.length, referral_count: jget('saturnpay_referrals', []).length };
+    return LOCAL_TASKS.map(k => ({ ...k, progress: Math.min(prog[k.type], k.target), done: prog[k.type] >= k.target, claimed: claims.includes(k.id) }));
+  }
+
+  function title(k) {
+    if (k.type === 'deposit_total') return t('depTitle').replace('{n}', k.target);
+    return k.target === 1 ? t('invOne') : t('invN').replace('{n}', k.target);
+  }
+  function note(kind, text) { const m = document.getElementById('msg'); m.className = 'task-msg ' + kind; m.textContent = text; }
+
+  const ARROW = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 6 6 6-6 6"/></svg>';
+
+  function renderPin(refs) {
+    const next = refs.find(k => !k.claimed);
+    const el = document.getElementById('pinCard');
+    let body;
+    if (!next) {
+      body = `<div class="pin-title">${esc(t('pinAll'))}</div>`;
+    } else {
+      const raw = next.rawProgress != null ? next.rawProgress : next.progress;
+      const pct = Math.min(100, Math.round((raw / next.target) * 100));
+      const act = next.done
+        ? `<button class="task-btn claim" data-claim="${esc(next.id)}">${esc(t('claim'))}</button>`
+        : `<span class="task-prog">${raw} / ${next.target} ${esc(t('friends'))}</span>`;
+      body = `<div class="pin-title">${esc(t('pinTitle'))}</div>
+        <div class="task-prog" style="font-family:Inter,sans-serif;font-size:12px;">${esc(t('pinSub'))}</div>
+        <div class="pin-track"><div class="bar"><i style="width:${pct}%"></i></div><span class="pin-dot" style="left:${pct}%"></span></div>
+        <div class="pin-ends"><span>0</span><span>${next.target}</span></div>
+        <div class="pin-foot">${act}<span class="task-reward">+${usd(next.reward)}</span></div>`;
+    }
+    el.innerHTML = `<div class="pin-top"><span class="pin-label">📌 ${esc(t('pinLabel'))}</span><a class="pin-go" href="referral.html" aria-label="Referral">${ARROW}</a></div>` + body;
+  }
+
+  function render(list) {
+    const refs = list.filter(x => x.type === 'referral_count');
+    const rest = list.filter(x => x.type !== 'referral_count');
+    renderPin(refs);
+    document.getElementById('doneCount').textContent = list.filter(x => x.claimed).length + ' / ' + list.length;
+    document.getElementById('earnedTotal').textContent = usd(list.filter(x => x.claimed).reduce((s, x) => s + x.reward, 0));
+    document.getElementById('taskList').innerHTML = rest.map(k => {
+      const pct = Math.round((k.progress / k.target) * 100);
+      const label = k.type === 'deposit_total' ? (Math.round(k.progress * 100) / 100) + ' / ' + k.target + ' USDT' : k.progress + ' / ' + k.target;
+      let btn;
+      if (k.claimed) btn = `<button class="task-btn" disabled>✓ ${esc(t('claimed'))}</button>`;
+      else if (k.done) btn = `<button class="task-btn claim" data-claim="${esc(k.id)}">${esc(t('claim'))}</button>`;
+      else btn = `<a class="task-btn" href="${k.type === 'deposit_total' ? 'deposit.html' : 'investments.html'}">${esc(t('go'))}</a>`;
+      return `<div class="task ${k.done ? 'is-done' : ''} ${k.claimed ? 'is-claimed' : ''}">
+        <div class="task-top"><div class="task-title">${esc(title(k))}</div><div class="task-reward">+${usd(k.reward)}</div></div>
+        <div class="bar"><i style="width:${pct}%"></i></div>
+        <div class="task-foot"><span class="task-prog">${esc(label)}</span>${btn}</div></div>`;
+    }).join('');
+  }
+
+  async function load() {
+    try {
+      const list = (window.SP && SP.live) ? await SP.call('/api/tasks') : localList();
+      render(list);
+    } catch (e) { note('err', t('load')); }
+  }
+
+  document.querySelector('main').addEventListener('click', async (ev) => {
+    const b = ev.target.closest('[data-claim]'); if (!b) return;
+    const id = b.getAttribute('data-claim'); b.disabled = true;
+    try {
+      if (window.SP && SP.live) {
+        await SP.call('/api/tasks/' + encodeURIComponent(id) + '/claim', {});
+        SP.sync();
+      } else {
+        const k = localList().find(x => x.id === id);
+        if (!k || !k.done || k.claimed) throw new Error('x');
+        const claims = jget(CLAIM_KEY, []); claims.push(id); localStorage.setItem(CLAIM_KEY, JSON.stringify(claims));
+        const txs = jget(TX_KEY, []);
+        txs.push({ id: 'tx_' + Math.random().toString(36).slice(2, 10), description: 'Task reward', amount: k.reward, fee: 0, kind: 'bonus', status: 'completed', date: new Date().toISOString() });
+        localStorage.setItem(TX_KEY, JSON.stringify(txs));
+      }
+      note('ok', t('ok'));
+    } catch (e) { note('err', (e && e.message && e.message !== 'x') ? e.message : t('err')); }
+    load();
+  });
+
+  applyLang();
+  load();
+</script>
+</body>
+</html>
