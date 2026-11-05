@@ -138,6 +138,19 @@
   .friend-bonus{ font-family:'IBM Plex Mono',monospace; font-size:13px; color:var(--good); }
   .empty-note{ color:var(--text-dim); font-size:13px; text-align:center; padding:24px 0; line-height:1.6; }
 
+  .rt-card{ background:linear-gradient(175deg, var(--card-2), var(--card)); border:1px solid var(--line-soft); border-radius:14px; padding:20px 20px 8px; margin-bottom:16px; }
+  .rt-row{ display:flex; align-items:center; justify-content:space-between; gap:10px; padding:13px 0; border-top:1px solid var(--line-soft); }
+  .rt-row:first-of-type{ border-top:none; }
+  .rt-row.claimed{ opacity:.6; }
+  .rt-name{ font-size:13.5px; color:var(--text); }
+  .rt-sub{ font-family:'IBM Plex Mono',monospace; font-size:11px; color:var(--text-faint); margin-top:3px; }
+  .rt-right{ display:flex; align-items:center; gap:10px; flex-shrink:0; }
+  .rt-reward{ font-family:'IBM Plex Mono',monospace; font-size:13px; color:var(--gold-bright); }
+  .rt-btn{ padding:7px 14px; border-radius:999px; border:none; font-size:12px; font-weight:600; cursor:pointer; background:linear-gradient(135deg, var(--gold-bright), var(--gold)); color:#141008; }
+  .rt-state{ font-size:11.5px; color:var(--text-faint); font-family:'IBM Plex Mono',monospace; }
+  .rt-msg{ display:none; margin-bottom:12px; padding:10px 14px; border-radius:9px; font-size:13px; }
+  .rt-msg.ok{ display:block; background:rgba(127,174,140,0.1); border:1px solid rgba(127,174,140,0.35); color:var(--good); }
+  .rt-msg.err{ display:block; background:rgba(201,119,87,0.1); border:1px solid rgba(201,119,87,0.35); color:var(--bad); }
   .bottom-nav{
     position:fixed; left:0; right:0; bottom:0; z-index:5;
     background:rgba(10,12,17,0.92); backdrop-filter:blur(10px);
@@ -220,6 +233,12 @@
       <div class="how-num">3</div>
       <p><span data-i18n="step3pre">5% of</span> <strong style="color:var(--text);" data-i18n="step3every">every</strong> <span data-i18n="step3post">investment your friend makes is automatically added to your bonus balance.</span></p>
     </div>
+  </div>
+
+  <div class="rt-card">
+    <div class="section-title" id="rtTitle">Referral tasks</div>
+    <div class="rt-msg" id="rtMsg"></div>
+    <div id="rtList"></div>
   </div>
 
   <div class="friends-card">
@@ -374,6 +393,8 @@
     document.getElementById('pageTitleTag').textContent = `Referral — Saturn-Pay`;
   }
 
+  const REF_I18N = {"en": {"rtTitle": "Referral tasks", "friendsN": "{n} friends", "claim": "Claim", "claimed": "Claimed", "locked": "Locked", "ok": "Reward added to your balance.", "err": "Could not claim the reward. Try again.", "pageDesc": "Invite friends: earn 5% of their first investment, plus milestone rewards.", "bonusPill": "5% of a friend's first investment", "heroDesc": "When a friend registers with your link and makes their first investment, you receive 5% of it as a bonus. We pay it, not your friend.", "step2": "Your friend registers with your link and makes their first investment.", "step3pre": "You receive", "step3every": "5%", "step3post": "of that investment as a bonus, paid by Saturn-Pay. Reaching 10, 20 … 500 friends unlocks extra rewards below."}, "tr": {"rtTitle": "Davet görevleri", "friendsN": "{n} arkadaş", "claim": "Ödülü al", "claimed": "Alındı", "locked": "Kilitli", "ok": "Ödül bakiyene eklendi.", "err": "Ödül alınamadı. Tekrar dene.", "pageDesc": "Arkadaşlarını davet et: ilk yatırımlarının %5'i bonus, ayrıca kademe ödülleri.", "bonusPill": "Arkadaşın ilk yatırımının %5'i", "heroDesc": "Arkadaşın linkinle kayıt olup ilk yatırımını yaptığında, yatırım tutarının %5'ini bonus olarak alırsın. Bonusu arkadaşın değil, biz öderiz.", "step2": "Arkadaşın linkinle kayıt olur ve ilk yatırımını yapar.", "step3pre": "Yatırımın", "step3every": "%5'ini", "step3post": "Saturn-Pay bonus olarak sana öder. 10, 20 … 500 arkadaşa ulaşınca aşağıdaki ek ödüllerin açılır."}, "ru": {"rtTitle": "Задания за приглашения", "friendsN": "{n} друзей", "claim": "Забрать", "claimed": "Получено", "locked": "Закрыто", "ok": "Награда добавлена на баланс.", "err": "Не удалось получить награду. Повторите.", "pageDesc": "Приглашайте друзей: 5% от их первой инвестиции плюс награды за этапы.", "bonusPill": "5% от первой инвестиции друга", "heroDesc": "Когда друг регистрируется по вашей ссылке и делает первую инвестицию, вы получаете 5% от неё бонусом. Платим мы, а не ваш друг.", "step2": "Ваш друг регистрируется по ссылке и делает первую инвестицию.", "step3pre": "Вы получаете", "step3every": "5%", "step3post": "от этой инвестиции бонусом от Saturn-Pay. Достигнув 10, 20 … 500 друзей, вы откроете дополнительные награды ниже."}, "es": {"rtTitle": "Tareas de invitación", "friendsN": "{n} amigos", "claim": "Reclamar", "claimed": "Reclamado", "locked": "Bloqueado", "ok": "Recompensa añadida a tu saldo.", "err": "No se pudo reclamar. Inténtalo de nuevo.", "pageDesc": "Invita a amigos: gana el 5% de su primera inversión, más recompensas por hitos.", "bonusPill": "5% de la primera inversión de tu amigo", "heroDesc": "Cuando un amigo se registra con tu enlace y hace su primera inversión, recibes el 5% como bono. Lo paga Saturn-Pay, no tu amigo.", "step2": "Tu amigo se registra con tu enlace y hace su primera inversión.", "step3pre": "Recibes el", "step3every": "5%", "step3post": "de esa inversión como bono, pagado por Saturn-Pay. Al llegar a 10, 20 … 500 amigos desbloqueas recompensas extra abajo."}, "fr": {"rtTitle": "Missions de parrainage", "friendsN": "{n} amis", "claim": "Récupérer", "claimed": "Récupérée", "locked": "Verrouillée", "ok": "Récompense ajoutée à votre solde.", "err": "Impossible de récupérer la récompense. Réessayez.", "pageDesc": "Invitez des amis : gagnez 5 % de leur premier investissement, plus des récompenses par paliers.", "bonusPill": "5 % du premier investissement d’un ami", "heroDesc": "Quand un ami s’inscrit avec votre lien et fait son premier investissement, vous recevez 5 % en bonus. C’est Saturn-Pay qui paie, pas votre ami.", "step2": "Votre ami s’inscrit avec votre lien et fait son premier investissement.", "step3pre": "Vous recevez", "step3every": "5 %", "step3post": "de cet investissement en bonus, payé par Saturn-Pay. À 10, 20 … 500 amis, des récompenses supplémentaires se débloquent ci-dessous."}, "de": {"rtTitle": "Einladungsaufgaben", "friendsN": "{n} Freunde", "claim": "Abholen", "claimed": "Abgeholt", "locked": "Gesperrt", "ok": "Belohnung deinem Guthaben gutgeschrieben.", "err": "Belohnung konnte nicht abgeholt werden. Erneut versuchen.", "pageDesc": "Lade Freunde ein: 5 % ihrer ersten Investition plus Meilenstein-Belohnungen.", "bonusPill": "5 % der ersten Investition deines Freundes", "heroDesc": "Wenn sich ein Freund mit deinem Link registriert und seine erste Investition tätigt, erhältst du 5 % davon als Bonus. Wir zahlen ihn, nicht dein Freund.", "step2": "Dein Freund registriert sich mit deinem Link und tätigt seine erste Investition.", "step3pre": "Du erhältst", "step3every": "5 %", "step3post": "dieser Investition als Bonus von Saturn-Pay. Bei 10, 20 … 500 Freunden schaltest du unten Zusatzprämien frei."}};
+  Object.keys(REF_I18N).forEach(l => Object.assign(translations[l] || (translations[l] = {}), REF_I18N[l]));
   const token = localStorage.getItem('saturnpay_token');
   const userRaw = localStorage.getItem('saturnpay_user');
   if (!token) { window.location.href = 'login.html'; }
@@ -395,8 +416,8 @@
     return 'SP-' + code;
   }
 
-  const refCode = makeReferralCode(user.id || user.email);
-  const refLink = `${location.origin}${location.pathname.replace('referral.html', 'login.html')}?ref=${refCode}`;
+  let refCode = makeReferralCode(user.id || user.email);
+  let refLink = `${location.origin}${location.pathname.replace('referral.html', 'register.html')}?ref=${refCode}`;
 
   document.getElementById('refCode').textContent = refCode;
   document.getElementById('refLink').textContent = refLink;
@@ -474,6 +495,72 @@
 
   applyLang();
   renderReferrals();
+
+  // ---- Referral tasks (server decides progress & rewards in live mode) ----
+  const RT_TIERS = [[10,1],[20,1.1],[30,1.3],[40,1.4],[50,1.5],[100,2],[200,3],[300,4],[400,5],[500,6]];
+  const RT_CLAIM_KEY = 'saturnpay_task_claims', RT_TX_KEY = 'saturnpay_transactions';
+  const rtj = (k, d) => { try { const v = JSON.parse(localStorage.getItem(k) || 'null'); return v == null ? d : v; } catch (e) { return d; } };
+  const rtLive = () => !!(window.SP && SP.live);
+  let rtState = { count: 0, claimed: [], friends: null, invBonus: 0 };
+
+  function rtMsg(kind, text) { const m = document.getElementById('rtMsg'); m.className = 'rt-msg ' + kind; m.textContent = text; }
+  function rtRender() {
+    document.getElementById('rtTitle').textContent = t('rtTitle');
+    const c = rtState.count;
+    document.getElementById('rtList').innerHTML = RT_TIERS.map(([n, r]) => {
+      const id = 'ref_' + n, claimed = rtState.claimed.includes(id), done = c >= n;
+      const right = claimed ? `<span class="rt-state">✓ ${escapeHtml(t('claimed'))}</span>`
+        : done ? `<button class="rt-btn" data-rt="${id}">${escapeHtml(t('claim'))}</button>`
+        : `<span class="rt-state">${Math.min(c, n)} / ${n}</span>`;
+      return `<div class="rt-row ${claimed ? 'claimed' : ''}"><div><div class="rt-name">${escapeHtml(t('friendsN').replace('{n}', n))}</div><div class="rt-sub">${escapeHtml(claimed ? t('claimed') : done ? '' : t('locked'))}</div></div>
+        <div class="rt-right"><span class="rt-reward">+${formatUSD(r)}</span>${right}</div></div>`;
+    }).join('');
+    const earned = RT_TIERS.filter(([n]) => rtState.claimed.includes('ref_' + n)).reduce((s, x) => s + x[1], 0);
+    document.getElementById('friendCount').textContent = c;
+    document.getElementById('bonusTotal').textContent = formatUSD(earned + rtState.invBonus);
+    if (rtState.friends) {
+      const fl = document.getElementById('friendsList');
+      fl.innerHTML = rtState.friends.length === 0
+        ? `<div class="empty-note">${t('noFriendsYet')}<br>${t('startSharing')}</div>`
+        : rtState.friends.map(f => `<div class="friend-row"><div><div class="friend-name">${escapeHtml(f.name)}</div><div class="friend-date">${t('joinedLabel')}: ${formatDateLocalized(f.joinedDate)}</div></div><div class="friend-bonus">+${formatUSD(f.bonusEarned || 0)}</div></div>`).join('');
+    }
+  }
+  async function rtLoad() {
+    try {
+      if (rtLive()) {
+        const [info, list] = await Promise.all([SP.call('/api/tasks/referral-info'), SP.call('/api/tasks')]);
+        if (info.code) {
+          refCode = info.code;
+          refLink = `${location.origin}${location.pathname.replace('referral.html', 'register.html')}?ref=${refCode}`;
+          document.getElementById('refCode').textContent = refCode;
+          document.getElementById('refLink').textContent = refLink;
+        }
+        rtState = { count: info.count, claimed: list.filter(x => x.claimed && x.type === 'referral_count').map(x => x.id), friends: info.friends || [], invBonus: info.bonusTotal || 0 };
+      } else {
+        rtState = { count: loadReferrals().length, claimed: rtj(RT_CLAIM_KEY, []), friends: null, invBonus: 0 };
+      }
+    } catch (e) { rtMsg('err', t('err')); }
+    rtRender();
+  }
+  document.getElementById('rtList').addEventListener('click', async (ev) => {
+    const b = ev.target.closest('[data-rt]'); if (!b) return;
+    const id = b.getAttribute('data-rt'); b.disabled = true;
+    try {
+      if (rtLive()) { await SP.call('/api/tasks/' + id + '/claim', {}); SP.sync(); }
+      else {
+        const tier = RT_TIERS.find(x => 'ref_' + x[0] === id);
+        const claims = rtj(RT_CLAIM_KEY, []);
+        if (!tier || rtState.count < tier[0] || claims.includes(id)) throw new Error('x');
+        claims.push(id); localStorage.setItem(RT_CLAIM_KEY, JSON.stringify(claims));
+        const txs = rtj(RT_TX_KEY, []);
+        txs.push({ id: 'tx_' + Math.random().toString(36).slice(2, 10), description: 'Task reward', amount: tier[1], fee: 0, kind: 'bonus', status: 'completed', date: new Date().toISOString() });
+        localStorage.setItem(RT_TX_KEY, JSON.stringify(txs));
+      }
+      rtMsg('ok', t('ok'));
+    } catch (e) { rtMsg('err', (e && e.message && e.message !== 'x') ? e.message : t('err')); }
+    rtLoad();
+  });
+  rtLoad();
 </script>
 
 </body>
