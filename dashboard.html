@@ -288,6 +288,23 @@
   @media (max-width:480px){
     .assets-value{ font-size:32px; }
   }
+
+  .lb-card{ background:linear-gradient(175deg, var(--card-2), var(--card)); border:1px solid var(--line-soft); border-radius:14px; padding:18px 18px 12px; margin-top:16px; }
+  .lb-head{ display:flex; align-items:center; justify-content:space-between; margin-bottom:12px; }
+  .lb-title{ font-size:11px; color:var(--gold); font-family:'IBM Plex Mono',monospace; text-transform:uppercase; letter-spacing:0.08em; }
+  .lb-tabs{ display:flex; gap:6px; margin-bottom:8px; }
+  .lb-tab{ flex:1; padding:8px 4px; border-radius:999px; border:1px solid var(--line); background:transparent; color:var(--text-dim); font-size:11.5px; cursor:pointer; white-space:nowrap; }
+  .lb-tab.active{ border-color:rgba(212,175,55,0.5); color:var(--gold-bright); background:rgba(212,175,55,0.08); }
+  .lb-row{ display:flex; align-items:center; gap:12px; padding:11px 0; border-top:1px solid var(--line-soft); }
+  .lb-row:first-child{ border-top:none; }
+  .lb-row.me{ background:rgba(212,175,55,0.06); margin:0 -10px; padding:11px 10px; border-radius:9px; }
+  .lb-rank{ width:26px; text-align:center; font-family:'IBM Plex Mono',monospace; font-size:13px; color:var(--text-faint); flex-shrink:0; }
+  .lb-rank.top{ color:var(--gold-bright); font-size:16px; }
+  .lb-name{ flex:1; min-width:0; font-size:13.5px; color:var(--text); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .lb-val{ font-family:'IBM Plex Mono',monospace; font-size:13px; color:var(--gold-bright); flex-shrink:0; }
+  .lb-empty{ color:var(--text-dim); font-size:13px; text-align:center; padding:20px 0; }
+  .lb-foot{ display:flex; align-items:center; justify-content:space-between; gap:10px; padding:10px 0 4px; border-top:1px solid var(--line-soft); margin-top:4px; }
+  .lb-hide{ background:none; border:none; color:var(--text-faint); font-size:11.5px; cursor:pointer; text-decoration:underline; padding:0; }
 </style>
 <script src="saturnpay-config.js"></script>
 <link rel="icon" href="favicon.svg" type="image/svg+xml">
@@ -363,6 +380,16 @@
       </div>
     </div>
     <div id="investList"></div>
+  </div>
+  <div class="lb-card" id="lbCard" style="display:none;">
+    <div class="lb-head"><span class="lb-title" id="lbTitle">Leaderboard</span></div>
+    <div class="lb-tabs" id="lbTabs">
+      <button class="lb-tab active" data-k="invites" id="lbT1">Referrals</button>
+      <button class="lb-tab" data-k="invest" id="lbT2">Invested</button>
+      <button class="lb-tab" data-k="profit" id="lbT3">Profit</button>
+    </div>
+    <div id="lbList"></div>
+    <div class="lb-foot"><span class="lb-hide" style="text-decoration:none;" id="lbHiddenNote"></span><button class="lb-hide" id="lbHide"></button></div>
   </div>
 </main>
 
@@ -728,6 +755,42 @@
   }
 
   renderAll();
+
+  // ---- Leaderboard (real data from the server; hidden in test mode so no fake numbers are shown) ----
+  const LB_I18N = {"en": {"lbTitle": "Leaderboard", "lbInvites": "Referrals", "lbInvest": "Invested", "lbProfit": "Profit", "lbEmpty": "No one on the board yet. Be the first!", "lbYou": "You", "lbHide": "Hide my name from the leaderboard", "lbShow": "Show my name on the leaderboard", "lbHidden": "Your name is hidden", "lbFriends": "friends"}, "tr": {"lbTitle": "Liderlik tablosu", "lbInvites": "Davet", "lbInvest": "Yatırım", "lbProfit": "Kazanç", "lbEmpty": "Henüz kimse yok. İlk sen ol!", "lbYou": "Sen", "lbHide": "Adımı tablodan gizle", "lbShow": "Adımı tabloda göster", "lbHidden": "Adınız gizli", "lbFriends": "arkadaş"}, "ru": {"lbTitle": "Таблица лидеров", "lbInvites": "Приглашения", "lbInvest": "Инвестиции", "lbProfit": "Доход", "lbEmpty": "Пока никого нет. Будьте первым!", "lbYou": "Вы", "lbHide": "Скрыть моё имя из таблицы", "lbShow": "Показывать моё имя в таблице", "lbHidden": "Ваше имя скрыто", "lbFriends": "друзей"}, "es": {"lbTitle": "Clasificación", "lbInvites": "Invitados", "lbInvest": "Inversión", "lbProfit": "Ganancia", "lbEmpty": "Aún no hay nadie. ¡Sé el primero!", "lbYou": "Tú", "lbHide": "Ocultar mi nombre de la clasificación", "lbShow": "Mostrar mi nombre en la clasificación", "lbHidden": "Tu nombre está oculto", "lbFriends": "amigos"}, "fr": {"lbTitle": "Classement", "lbInvites": "Parrainages", "lbInvest": "Investi", "lbProfit": "Gains", "lbEmpty": "Personne pour l’instant. Soyez le premier !", "lbYou": "Vous", "lbHide": "Masquer mon nom du classement", "lbShow": "Afficher mon nom dans le classement", "lbHidden": "Votre nom est masqué", "lbFriends": "amis"}, "de": {"lbTitle": "Bestenliste", "lbInvites": "Einladungen", "lbInvest": "Investiert", "lbProfit": "Gewinn", "lbEmpty": "Noch niemand. Sei der Erste!", "lbYou": "Du", "lbHide": "Meinen Namen in der Bestenliste verbergen", "lbShow": "Meinen Namen in der Bestenliste zeigen", "lbHidden": "Dein Name ist verborgen", "lbFriends": "Freunde"}};
+  Object.keys(LB_I18N).forEach(l => Object.assign(translations[l] || (translations[l] = {}), LB_I18N[l]));
+  let lbData = null, lbKey = 'invites';
+  const lbEsc = (x) => String(x).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  const lbVal = (k, v) => k === 'invites' ? v + ' ' + t('lbFriends') : '$' + Number(v).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  function lbRender() {
+    const card = document.getElementById('lbCard');
+    if (!lbData) { card.style.display = 'none'; return; }
+    card.style.display = '';
+    document.getElementById('lbTitle').textContent = '🏆 ' + t('lbTitle');
+    document.getElementById('lbT1').textContent = t('lbInvites');
+    document.getElementById('lbT2').textContent = t('lbInvest');
+    document.getElementById('lbT3').textContent = t('lbProfit');
+    document.querySelectorAll('.lb-tab').forEach(b => b.classList.toggle('active', b.dataset.k === lbKey));
+    const d = lbData[lbKey], medal = ['🥇', '🥈', '🥉'];
+    let html = d.top.map(x => `<div class="lb-row ${x.me ? 'me' : ''}"><span class="lb-rank ${x.rank <= 3 ? 'top' : ''}">${x.rank <= 3 ? medal[x.rank - 1] : x.rank}</span><span class="lb-name">${lbEsc(x.name)}${x.me ? ' · ' + lbEsc(t('lbYou')) : ''}</span><span class="lb-val">${lbEsc(lbVal(lbKey, x.value))}</span></div>`).join('');
+    if (!d.top.length) html = `<div class="lb-empty">${lbEsc(t('lbEmpty'))}</div>`;
+    if (d.me && !d.top.some(x => x.me)) html += `<div class="lb-row me"><span class="lb-rank">${d.me.rank}</span><span class="lb-name">${lbEsc(t('lbYou'))}</span><span class="lb-val">${lbEsc(lbVal(lbKey, d.me.value))}</span></div>`;
+    document.getElementById('lbList').innerHTML = html;
+    document.getElementById('lbHide').textContent = lbData.hidden ? t('lbShow') : t('lbHide');
+    document.getElementById('lbHiddenNote').textContent = lbData.hidden ? t('lbHidden') : '';
+  }
+  async function lbLoad() {
+    if (!(window.SP && SP.live)) return;
+    try { lbData = await SP.call('/api/leaderboard'); } catch (e) { lbData = null; }
+    lbRender();
+  }
+  document.getElementById('lbTabs').addEventListener('click', (e) => { const b = e.target.closest('.lb-tab'); if (!b) return; lbKey = b.dataset.k; lbRender(); });
+  document.getElementById('lbHide').addEventListener('click', async () => {
+    if (!lbData) return;
+    try { await SP.call('/api/leaderboard/hide', { hidden: !lbData.hidden }); } catch (e) {}
+    lbLoad();
+  });
+  lbLoad();
 </script>
 
 </body>
