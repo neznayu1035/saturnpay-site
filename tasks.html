@@ -264,7 +264,7 @@
     { id: 'first_invest',  type: 'invest_count',  target: 1,   reward: 2 },
     { id: 'deposit_200',   type: 'deposit_total', target: 200, reward: 3 },
     { id: 'invest_3',      type: 'invest_count',  target: 3,   reward: 3 },
-    ...[[10,1],[20,1.1],[30,1.3],[40,1.4],[50,1.5],[100,2],[200,3],[300,4],[400,5],[500,6]].map(([n, r]) => ({ id: 'ref_' + n, type: 'referral_count', target: n, reward: r })),
+    ...[[10,1],[20,1.1],[30,1.3],[40,1.4],[50,1.5],[100,9],[200,25.5],[300,35.5],[400,45.5],[500,55.5],[1000,105.5]].map(([n, r]) => ({ id: 'ref_' + n, type: 'referral_count', target: n, reward: r })),
   ];
   const TX_KEY = 'saturnpay_transactions', INV_KEY = 'saturnpay_investments', CLAIM_KEY = 'saturnpay_task_claims';
   const jget = (k, d) => { try { const v = JSON.parse(localStorage.getItem(k) || 'null'); return v == null ? d : v; } catch (e) { return d; } };
