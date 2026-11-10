@@ -114,6 +114,17 @@
   .toast{ position:fixed; left:50%; bottom:22px; transform:translateX(-50%); max-width:90%; padding:11px 16px; border-radius:10px; font-size:13px;
     background:var(--card-2); border:1px solid var(--gold-dim); color:var(--gold-bright); z-index:50; display:none; }
   .toast.err{ border-color:var(--bad); color:var(--bad); }
+  .prof{ margin-top:12px; padding:12px 14px; border:1px solid var(--line); border-radius:10px; background:var(--field); }
+  .prof h4{ font-size:11px; color:var(--gold); font-family:'IBM Plex Mono',monospace; text-transform:uppercase; letter-spacing:.08em; margin:12px 0 6px; font-weight:500; }
+  .prof h4:first-child{ margin-top:0; }
+  .kv{ display:flex; justify-content:space-between; gap:12px; padding:5px 0; font-size:12.5px; border-top:1px solid rgba(255,255,255,0.05); }
+  .kv:first-of-type{ border-top:none; }
+  .kv span:first-child{ color:var(--text-faint); flex-shrink:0; }
+  .kv span:last-child{ color:var(--text); text-align:right; word-break:break-all; }
+  .plist{ font-size:12px; color:var(--text-dim); }
+  .plist div{ display:flex; justify-content:space-between; gap:10px; padding:5px 0; border-top:1px solid rgba(255,255,255,0.05); }
+  .plist div:first-child{ border-top:none; }
+  .plist .r{ text-align:right; color:var(--text); flex-shrink:0; }
 </style>
 <script src="saturnpay-config.js"></script>
 <link rel="icon" href="favicon.svg" type="image/svg+xml">
@@ -121,7 +132,7 @@
 <link rel="shortcut icon" href="favicon.ico">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
 <link rel="manifest" href="site.webmanifest">
-<meta name="theme-color" content="#0B0D12">
+<meta name="theme-color" content="#0A0A0A">
 </head>
 <body>
 <div class="wrap">
@@ -418,17 +429,45 @@
   }
 
 
+  // ── Kullanıcı profili ─────────────────────────────────────────
+  let profile = null; // { id, data }
+  const dt = (x) => x ? new Date(x).toLocaleString('tr-TR') : '—';
+  const kv = (k, v) => `<div class="kv"><span>${esc(k)}</span><span>${v}</span></div>`;
+  function profileHtml(id) {
+    if (!profile || profile.id !== id) return '';
+    const p = profile.data, T = p.totals;
+    return `<div class="prof">
+      <h4>Hesap</h4>
+      ${kv('Ad Soyad', esc(p.name || '—'))}${kv('E-posta', esc(p.email))}${kv('Durum', esc(p.status) + (p.isAdmin ? ' · yönetici' : ''))}
+      ${kv('Kayıt tarihi', esc(dt(p.createdAt)))}${kv('Son giriş', esc(dt(p.lastLoginAt)))}${kv('Şartları kabul', esc(dt(p.termsAcceptedAt)))}
+      ${kv('Parola', 'Güvenli şifrelenmiş (görüntülenemez)')}${kv('Hatalı giriş', esc(String(p.failedLogins)) + (p.lockedUntil && new Date(p.lockedUntil) > new Date() ? ' · kilitli: ' + esc(dt(p.lockedUntil)) : ''))}
+      <h4>Bakiye ve toplamlar</h4>
+      ${kv('Boşta bakiye', fmtUSD(p.balance))}${kv('Toplam yatırılan (brüt)', fmtUSD(T.deposited))}${kv('Yatırım yapılan', fmtUSD(T.invested))}${kv('Ödenen kâr', fmtUSD(T.profitPaid))}
+      ${kv('Çekilen', fmtUSD(T.withdrawnDone))}${kv('Bekleyen çekim', fmtUSD(T.withdrawPending))}${kv('Bonuslar', fmtUSD(T.bonuses))}
+      <h4>Davet ve Telegram</h4>
+      ${kv('Davet kodu', esc(p.refCode || '—'))}${kv('Davet eden', p.referredBy ? esc(p.referredBy.name || '') + ' · ' + esc(p.referredBy.email) : '—')}${kv('Davet ettiği', esc(String(p.referralCount)))}
+      ${kv('Telegram', p.telegramLinked ? 'bağlı · ' + esc(p.telegramId) : 'bağlı değil')}${kv('Tabloda gizli', p.hiddenFromLeaderboard ? 'evet' : 'hayır')}
+      ${p.depositAddresses.length ? '<h4>Yatırma adresleri</h4>' + p.depositAddresses.map(a => kv(a.network, esc(a.address))).join('') : ''}
+      <h4>Yatırımlar (${p.investments.length})</h4>
+      <div class="plist">${p.investments.length ? p.investments.map(i => `<div><span>${esc(i.plan)} · ${esc(new Date(i.startTs).toLocaleDateString('tr-TR'))} → ${esc(new Date(i.endTs).toLocaleDateString('tr-TR'))}${i.settled ? ' ✓' : ''}</span><span class="r">${fmtUSD(i.amount)}</span></div>`).join('') : '<div>Yok</div>'}</div>
+      <h4>Son işlemler</h4>
+      <div class="plist">${p.ledger.length ? p.ledger.map(x => `<div><span>${esc(x.description || x.kind)}<br><small style="color:var(--text-faint)">${esc(dt(x.date))} · ${esc(x.status)}${x.address ? ' · ' + esc(x.address) : ''}</small></span><span class="r">${x.amount >= 0 ? '+' : '−'}${fmtUSD(Math.abs(x.amount))}</span></div>`).join('') : '<div>Yok</div>'}</div>
+    </div>`;
+  }
+
   // ── Hesap yönetimi ─────────────────────────────────────────────
   function manageHtml(u, blocked) {
-    if (u.isAdmin) return '<div class="manage"><div class="mnote">Yönetici hesapları buradan değiştirilemez.</div></div>';
+    if (u.isAdmin) return `<div class="manage" data-id="${esc(u.id)}"><div class="acts"><button class="abtn" data-act="profile">👤 Profil</button></div>${profileHtml(u.id)}<div class="mnote">Yönetici hesapları buradan değiştirilemez.</div></div>`;
     const f = form && form.id === u.id ? form : null;
     return `<div class="manage" data-id="${esc(u.id)}">
       <div class="acts">
+        <button class="abtn" data-act="profile">👤 Profil</button>
         <button class="abtn good" data-act="bonus">+ Bonus ekle</button>
         <button class="abtn warn" data-act="deduct">− Bakiye düş</button>
         ${blocked ? '<button class="abtn good" data-act="unblock">Engeli kaldır</button>' : '<button class="abtn warn" data-act="block">Engelle</button>'}
         <button class="abtn bad" data-act="delete">Hesabı sil</button>
       </div>
+      ${profileHtml(u.id)}
       ${f ? `<div class="mform">
         <input id="mfAmt" type="text" inputmode="decimal" placeholder="Tutar (USDT)" value="${esc(f.amount || '')}">
         <input id="mfNote" type="text" maxlength="120" placeholder="Not (isteğe bağlı)" value="${esc(f.note || '')}">
@@ -454,6 +493,10 @@
     if (!API_BASE) { toast('Örnek veri: bu işlemler sunucu bağlanınca çalışır.', true); return; }
     const u = (DATA.users || []).find(x => x.id === id); if (!u) return;
     try {
+      if (act === 'profile') {
+        if (profile && profile.id === id) { profile = null; render(); return; }
+        profile = { id, data: await adminCall(`/users/${id}/profile`, 'GET') }; render(); return;
+      }
       if (act === 'bonus' || act === 'deduct') { form = { id, type: act, amount: '', note: '' }; render(); const a = document.getElementById('mfAmt'); if (a) a.focus(); return; }
       if (act === 'submit') {
         const amount = document.getElementById('mfAmt').value.trim().replace(',', '.');
@@ -479,7 +522,7 @@
     const b = e.target.closest('[data-act]');
     if (b) { runAction(b.closest('.manage').dataset.id, b.dataset.act); return; }
     const t = e.target.closest('[data-toggle]');
-    if (t) { const id = t.dataset.toggle; openId = openId === id ? null : id; form = null; render(); }
+    if (t) { const id = t.dataset.toggle; openId = openId === id ? null : id; form = null; profile = null; render(); }
   });
   document.getElementById('userSearch').addEventListener('input', () => render());
 
