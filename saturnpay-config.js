@@ -55,3 +55,6 @@
   }
   SP.sync();
 })();
+
+/* PWA: uygulama yükleme + service worker */
+(function () { var s = document.createElement('script'); s.src = '/pwa.js'; s.defer = true; (document.head || document.documentElement).appendChild(s); })();
