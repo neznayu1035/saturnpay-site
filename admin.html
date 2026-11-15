@@ -142,7 +142,10 @@
       <h1>Yönetim Paneli</h1>
       <div class="sub" id="updated">—</div>
     </div>
-    <button class="btn-sm" id="refreshBtn">Yenile</button>
+    <div style="display:flex;gap:8px;align-items:center;">
+      <a class="btn-sm" id="wdTop" href="#wdPanel" style="display:none;text-decoration:none;color:var(--bad);border-color:var(--bad);"></a>
+      <button class="btn-sm" id="refreshBtn">Yenile</button>
+    </div>
   </div>
 
   <div class="banner" id="banner" style="display:none;"></div>
@@ -156,14 +159,15 @@
 
 
   <div class="panel">
-    <h2>Uyum kontrolü: Bybit'teki para yetiyor mu?</h2>
-    <div class="desc">Sitedeki bakiyeler senin kullanıcılara borcundur. Bybit'te gerçekte duran para bu borcu karşılamalı. Alt hesaptan para çekersen veya toplarsan sitedeki bakiye kendiliğinden azalmaz.</div>
+    <h2>Uyum kontrolü: Cüzdanlardaki para yetiyor mu?</h2>
+    <div class="desc">Sitedeki bakiyeler senin kullanıcılara borcundur. NOWPayments ödemelerinin gittiği cüzdanlarında gerçekte duran USDT bu borcu karşılamalı. Cüzdanından para çıkarsan sitedeki bakiye kendiliğinden azalmaz. Cüzdan toplamını aşağıya kendin yaz.</div>
     <div class="recon-row"><span>Kullanıcı bakiyeleri (boşta)</span><b id="rIdle">—</b></div>
     <div class="recon-row"><span>Yatırımdaki anapara</span><b id="rPrincipal">—</b></div>
     <div class="recon-row total"><span>Anapara + bakiye borcu</span><b id="rLiab">—</b></div>
     <div class="recon-row"><span>Aktif planlar için ödenecek kâr</span><b id="rProfit">—</b></div>
     <div class="recon-row total"><span>Toplam yükümlülük (kâr dahil)</span><b id="rObl">—</b></div>
-    <div class="recon-row"><span>Bybit'teki gerçek bakiye (ana + alt hesaplar)</span><b id="rEx">—</b></div>
+    <div class="recon-row"><span>Cüzdanlarındaki gerçek USDT (kendin yaz)</span><b id="rEx">—</b></div>
+    <div class="mform"><input id="walletInput" inputmode="decimal" placeholder="Örn. 1250.50" autocomplete="off"><button class="abtn warn" id="walletSave" type="button">Kaydet</button></div>
     <div class="cov" id="cov"><i id="covBar" style="width:0"></i></div>
     <div class="status" id="reconStatus"></div>
   </div>
@@ -194,6 +198,19 @@
     <div class="desc">Süresi en yakın dolacak yatırımlar.</div>
     <div id="dueList"></div>
     <button class="more" id="moreDue" style="display:none;">Daha fazla göster</button>
+  </div>
+
+  <div class="panel" id="wdPanel">
+    <h2>Çekim talepleri <span class="badge admin" id="wdCount">—</span></h2>
+    <div class="desc">Önce parayı cüzdanından gönder, sonra "Gönderdim" de. Göndermeyeceksen "Reddet": kullanıcıya talep ettiği tutarın tamamı iade edilir.</div>
+    <div id="wdList"></div>
+  </div>
+
+  <div class="panel" id="depPanel">
+    <h2>Yatırma geçmişi <span class="badge admin" id="depCount">—</span></h2>
+    <div class="desc">Kullanıcıların yaptığı son yatırmalar. Net, kesinti düşüldükten sonra bakiyeye eklenen tutardır.</div>
+    <div id="depList"></div>
+    <button class="more" id="depMore" style="display:none;">Daha fazla göster</button>
   </div>
 
   <div class="panel">
@@ -345,25 +362,25 @@
     document.getElementById('rLiab').textContent = fmtUSD(liab);
     document.getElementById('rProfit').textContent = fmtUSD(c.profitOwed);
     document.getElementById('rObl').textContent = fmtUSD(obl);
-    const exch = DATA.exchange && typeof DATA.exchange.totalUsdt === 'number' ? DATA.exchange.totalUsdt : null;
+    const exch = DATA.exchange && typeof DATA.exchange.totalUsdt === 'number' ? DATA.exchange.totalUsdt : walletTotal();
     const st = document.getElementById('reconStatus'), cov = document.getElementById('cov'), bar = document.getElementById('covBar');
     if (exch === null) {
       document.getElementById('rEx').textContent = '—';
       bar.style.width = '0'; cov.className = 'cov';
-      st.className = 'status warn'; st.textContent = 'Bybit bakiyesi sunucudan gelmedi, karşılaştırma yapılamıyor.';
+      st.className = 'status warn'; st.textContent = 'Cüzdanlarındaki USDT toplamını aşağıya yazarsan karşılaştırma yapılır.';
     } else {
       document.getElementById('rEx').textContent = fmtUSD(exch);
       const pct = obl > 0 ? exch / obl * 100 : 100;
       bar.style.width = Math.min(100, pct) + '%';
       if (exch < liab) {
         cov.className = 'cov bad'; st.className = 'status bad';
-        st.textContent = `Dikkat: Bybit'te ${fmtUSD(liab - exch)} eksik. Kullanıcıların bakiyesini ve yatırdıkları parayı bile tam karşılayamıyorsun.`;
+        st.textContent = `Dikkat: Cüzdanlarında ${fmtUSD(liab - exch)} eksik. Kullanıcıların bakiyesini ve yatırdıkları parayı bile tam karşılayamıyorsun.`;
       } else if (exch < obl) {
         cov.className = 'cov warn'; st.className = 'status warn';
         st.textContent = `Anapara ve bakiyeler karşılanıyor, ama planlar bitince ödenecek kârın ${fmtUSD(obl - exch)} kadarı için ek para gerekecek (karşılama %${Math.round(pct)}).`;
       } else {
         cov.className = 'cov'; st.className = 'status ok';
-        st.textContent = `Yeterli: Bybit'te borcun tamamından ${fmtUSD(exch - obl)} fazla var.`;
+        st.textContent = `Yeterli: Cüzdanlarında borcun tamamından ${fmtUSD(exch - obl)} fazla var.`;
       }
     }
 
@@ -534,6 +551,106 @@
   document.getElementById('moreDue').addEventListener('click', () => { dueShown += 10; render(); });
   document.getElementById('moreUsers').addEventListener('click', () => { usersShown += 10; render(); });
   document.getElementById('refreshBtn').addEventListener('click', async () => { const d = await loadData(); if (d) { DATA = d; render(); } });
+
+  // ── Çekim talepleri ───────────────────────────────────────────
+  let WD = [];
+  async function loadWithdrawals() {
+    if (!API_BASE) { document.getElementById('wdPanel').style.display = 'none'; return; }
+    try { WD = await adminCall('/withdrawals', 'GET'); }
+    catch (e) { toast(e.message || 'Çekimler alınamadı.', true); return; }
+    renderWithdrawals();
+  }
+  function renderWithdrawals() {
+    const pend = WD.filter(x => x.status === 'pending');
+    const done = WD.filter(x => x.status !== 'pending').slice(0, 5);
+    document.getElementById('wdCount').textContent = pend.length ? pend.length + ' bekleyen' : 'bekleyen yok';
+    const top = document.getElementById('wdTop');
+    top.style.display = pend.length ? '' : 'none';
+    top.textContent = pend.length + ' bekleyen çekim';
+    document.title = (pend.length ? '(' + pend.length + ') ' : '') + 'Yönetim Paneli';
+    const info = w => `
+      <div style="font-size:14px;">${esc(w.email)} <span style="color:var(--text-faint);font-size:12px;">#${esc(w.id)} · ${dFull(new Date(w.date).getTime())}</span></div>
+      <div style="font-size:12.5px;color:var(--text-dim);margin-top:4px;">İstenen ${fmtUSD(w.requested)} · kesinti ${fmtUSD(w.fee)} · <b style="color:var(--gold-bright);">gönderilecek ${fmtUSD(w.youSend)}</b> · ${esc(w.network || '')}</div>
+      <div style="font-family:'IBM Plex Mono',monospace;font-size:12px;word-break:break-all;margin-top:6px;">${esc(w.address || '')}</div>`;
+    const pendHtml = pend.map(w => `
+      <div class="manage" data-wid="${esc(w.id)}">${info(w)}
+        <div class="acts" style="margin-top:10px;">
+          <button class="abtn" data-wd="copy">Adresi kopyala</button>
+          <button class="abtn good" data-wd="complete">Gönderdim</button>
+          <button class="abtn bad" data-wd="reject">Reddet</button>
+        </div>
+      </div>`).join('');
+    const label = { completed: 'gönderildi', rejected: 'reddedildi' };
+    const doneHtml = done.length ? `<div style="font-size:11.5px;color:var(--text-faint);margin:14px 0 4px;">Son işlenenler</div>` + done.map(w => `
+      <div class="manage" style="opacity:.7;">${info(w)}<div style="font-size:12px;margin-top:6px;">${label[w.status] || esc(w.status)}</div></div>`).join('') : '';
+    document.getElementById('wdList').innerHTML = (pendHtml || '<div style="font-size:13px;color:var(--text-dim);padding:6px 0;">Bekleyen çekim talebi yok.</div>') + doneHtml;
+  }
+  document.getElementById('wdList').addEventListener('click', async e => {
+    const b = e.target.closest('[data-wd]'); if (!b) return;
+    const id = b.closest('[data-wid]').dataset.wid;
+    const w = WD.find(x => x.id === id); if (!w) return;
+    if (b.dataset.wd === 'copy') {
+      try { await navigator.clipboard.writeText(w.address); toast('Adres kopyalandı.'); } catch (_) { toast('Kopyalanamadı, adresi elle seçin.', true); }
+      return;
+    }
+    const act = b.dataset.wd;
+    const msg = act === 'complete'
+      ? `${w.email}\n${fmtUSD(w.youSend)} (${w.network}) adrese GÖNDERDİN mi?\nBu düğme parayı göndermez, sadece kaydı kapatır.`
+      : `${w.email} talebi REDDEDİLSİN mi?\nKullanıcıya ${fmtUSD(w.requested)} tutarın tamamı iade edilir.`;
+    if (!confirm(msg)) return;
+    b.disabled = true;
+    try {
+      await adminCall(`/withdrawals/${id}/${act}`, 'POST', {});
+      toast(act === 'complete' ? 'Talep tamamlandı olarak işaretlendi.' : 'Talep reddedildi, tutar iade edildi.');
+      await loadWithdrawals();
+      const d = await loadData(); if (d) { DATA = d; render(); }
+    } catch (err) { b.disabled = false; toast(err.message || 'İşlem başarısız.', true); }
+  });
+  document.getElementById('refreshBtn').addEventListener('click', loadWithdrawals);
+  loadWithdrawals();
+
+  // ── Cüzdan toplamı (uyum kontrolü) ───────────────────────────
+  function walletTotal() {
+    const v = parseFloat(localStorage.getItem('sp_wallet_total'));
+    return isFinite(v) ? v : null;
+  }
+  (function () {
+    const inp = document.getElementById('walletInput'), saved = localStorage.getItem('sp_wallet_total');
+    if (saved) inp.value = saved;
+    document.getElementById('walletSave').addEventListener('click', () => {
+      const raw = inp.value.trim().replace(',', '.');
+      if (raw === '') { localStorage.removeItem('sp_wallet_total'); toast('Cüzdan toplamı silindi.'); }
+      else if (!/^\d{1,9}(\.\d{1,2})?$/.test(raw)) { toast('Geçerli bir tutar yazın (örn. 1250.50).', true); return; }
+      else { localStorage.setItem('sp_wallet_total', raw); toast('Kaydedildi.'); }
+      if (typeof DATA !== 'undefined') render();
+    });
+  })();
+
+  // ── Yatırma geçmişi ───────────────────────────────────────────
+  let DEP = [], depShown = 10;
+  async function loadDeposits() {
+    if (!API_BASE) { document.getElementById('depPanel').style.display = 'none'; return; }
+    try { DEP = await adminCall('/deposits', 'GET'); }
+    catch (e) { toast(e.message || 'Yatırmalar alınamadı.', true); return; }
+    renderDeposits();
+  }
+  function renderDeposits() {
+    document.getElementById('depCount').textContent = DEP.length + ' kayıt';
+    document.getElementById('depList').innerHTML = DEP.length ? DEP.slice(0, depShown).map(d => `
+      <div style="padding:11px 0;border-top:1px solid var(--line-soft);">
+        <div style="display:flex;justify-content:space-between;gap:10px;">
+          <span style="font-size:14px;word-break:break-all;">${esc(d.email)}</span>
+          <b style="color:var(--good);white-space:nowrap;">+${fmtUSD(d.net)}</b>
+        </div>
+        <div style="font-size:12px;color:var(--text-dim);margin-top:3px;">brüt ${fmtUSD(d.gross)} · kesinti ${fmtUSD(d.fee)} · ${esc(d.network || '—')} · ${dFull(new Date(d.date).getTime())}</div>
+        <div style="font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--text-faint);margin-top:3px;word-break:break-all;">${esc(String(d.ref || '').slice(0, 40))}</div>
+      </div>`).join('') : '<div style="font-size:13px;color:var(--text-dim);padding:6px 0;">Henüz yatırma yok.</div>';
+    document.getElementById('depMore').style.display = DEP.length > depShown ? '' : 'none';
+  }
+  document.getElementById('depMore').addEventListener('click', () => { depShown += 10; renderDeposits(); });
+  document.getElementById('refreshBtn').addEventListener('click', loadDeposits);
+  loadDeposits();
+  setInterval(() => { loadWithdrawals(); loadDeposits(); }, 60000);
 
   (async () => { const d = await loadData(); if (d) { DATA = d; render(); } })();
 </script>
