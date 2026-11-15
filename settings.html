@@ -273,9 +273,10 @@
 <div class="overlay" id="installOverlay">
   <div class="sheet">
     <h2 data-i18n="installTitle">Download the app</h2>
-    <p id="installSteps" data-i18n="installAndroid"></p>
+    <p id="installSteps"></p>
     <div class="sheet-actions">
-      <button class="sheet-btn primary" onclick="closeOverlay('installOverlay')" data-i18n="close">Close</button>
+      <button class="sheet-btn" onclick="closeOverlay('installOverlay')" data-i18n="close">Close</button>
+      <button class="sheet-btn primary" id="installGoBtn" data-i18n="installBtn">Download</button>
     </div>
   </div>
 </div>
@@ -412,12 +413,12 @@
   };
 
   const extraT = {
-    en: { sectionApp:'App', installApp:'Download the app', installTitle:'Download the app', installAndroid:'Open the browser menu (⋮) and tap "Install app" or "Add to Home screen".', installIos:'Tap the Share button in Safari, then "Add to Home Screen".' },
-    tr: { sectionApp:'Uygulama', installApp:'Uygulamayı indir', installTitle:'Uygulamayı indir', installAndroid:'Tarayıcı menüsünü (⋮) aç ve "Uygulamayı yükle" veya "Ana ekrana ekle"ye dokun.', installIos:'Safari\'de Paylaş düğmesine, sonra "Ana Ekrana Ekle"ye dokun.' },
-    ru: { sectionApp:'Приложение', installApp:'Скачать приложение', installTitle:'Скачать приложение', installAndroid:'Откройте меню браузера (⋮) и нажмите «Установить приложение» или «Добавить на главный экран».', installIos:'В Safari нажмите «Поделиться», затем «На экран Домой».' },
-    es: { sectionApp:'App', installApp:'Descargar la app', installTitle:'Descargar la app', installAndroid:'Abre el menú del navegador (⋮) y toca "Instalar app" o "Añadir a pantalla de inicio".', installIos:'En Safari toca Compartir y luego "Añadir a pantalla de inicio".' },
-    fr: { sectionApp:'Application', installApp:"Télécharger l'app", installTitle:"Télécharger l'app", installAndroid:'Ouvrez le menu du navigateur (⋮) puis « Installer l\'application » ou « Ajouter à l\'écran d\'accueil ».', installIos:'Dans Safari, touchez Partager puis « Sur l\'écran d\'accueil ».' },
-    de: { sectionApp:'App', installApp:'App herunterladen', installTitle:'App herunterladen', installAndroid:'Öffne das Browsermenü (⋮) und tippe auf „App installieren“ oder „Zum Startbildschirm“.', installIos:'Tippe in Safari auf Teilen, dann „Zum Home-Bildschirm“.' }
+    en: { installReady:'Install Saturn Pay on your phone as an app.', installBtn:'Download', sectionApp:'App', installApp:'Download the app', installTitle:'Download the app', installAndroid:'Open the browser menu (⋮) and tap "Install app" or "Add to Home screen".', installIos:'Tap the Share button in Safari, then "Add to Home Screen".' },
+    tr: { installReady:'Saturn Pay\'i telefonuna uygulama olarak yükle.', installBtn:'İndir', sectionApp:'Uygulama', installApp:'Uygulamayı indir', installTitle:'Uygulamayı indir', installAndroid:'Tarayıcı menüsünü (⋮) aç ve "Uygulamayı yükle" veya "Ana ekrana ekle"ye dokun.', installIos:'Safari\'de Paylaş düğmesine, sonra "Ana Ekrana Ekle"ye dokun.' },
+    ru: { installReady:'Установите Saturn Pay на телефон как приложение.', installBtn:'Скачать', sectionApp:'Приложение', installApp:'Скачать приложение', installTitle:'Скачать приложение', installAndroid:'Откройте меню браузера (⋮) и нажмите «Установить приложение» или «Добавить на главный экран».', installIos:'В Safari нажмите «Поделиться», затем «На экран Домой».' },
+    es: { installReady:'Instala Saturn Pay en tu teléfono como app.', installBtn:'Descargar', sectionApp:'App', installApp:'Descargar la app', installTitle:'Descargar la app', installAndroid:'Abre el menú del navegador (⋮) y toca "Instalar app" o "Añadir a pantalla de inicio".', installIos:'En Safari toca Compartir y luego "Añadir a pantalla de inicio".' },
+    fr: { installReady:'Installez Saturn Pay sur votre téléphone comme une app.', installBtn:'Télécharger', sectionApp:'Application', installApp:"Télécharger l'app", installTitle:"Télécharger l'app", installAndroid:'Ouvrez le menu du navigateur (⋮) puis « Installer l\'application » ou « Ajouter à l\'écran d\'accueil ».', installIos:'Dans Safari, touchez Partager puis « Sur l\'écran d\'accueil ».' },
+    de: { installReady:'Installiere Saturn Pay als App auf deinem Handy.', installBtn:'Herunterladen', sectionApp:'App', installApp:'App herunterladen', installTitle:'App herunterladen', installAndroid:'Öffne das Browsermenü (⋮) und tippe auf „App installieren“ oder „Zum Startbildschirm“.', installIos:'Tippe in Safari auf Teilen, dann „Zum Home-Bildschirm“.' }
   };
   Object.keys(extraT).forEach(c => { translations[c] = Object.assign(translations[c] || {}, extraT[c]); });
 
@@ -508,12 +509,18 @@
     const standalone = (window.matchMedia && matchMedia('(display-mode: standalone)').matches) || navigator.standalone;
     if (standalone) { document.getElementById('appSection').style.display = 'none'; return; }
     const isIos = /iphone|ipad|ipod/i.test(navigator.userAgent);
+    const goBtn = document.getElementById('installGoBtn');
     document.getElementById('rowInstall').addEventListener('click', () => {
-      const ev = window.__spInstallEv;
-      if (ev && !isIos) { ev.prompt(); ev.userChoice.then(() => { window.__spInstallEv = null; }); return; }
       const t = translations[getLang()] || translations.en;
-      document.getElementById('installSteps').textContent = isIos ? t.installIos : t.installAndroid;
+      const canPrompt = !!window.__spInstallEv && !isIos;
+      // İndir butonu sadece tarayıcı kurulumu destekliyorsa görünür; değilse yönerge gösterilir
+      goBtn.style.display = canPrompt ? '' : 'none';
+      document.getElementById('installSteps').textContent = canPrompt ? t.installReady : (isIos ? t.installIos : t.installAndroid);
       openOverlay('installOverlay');
+    });
+    goBtn.addEventListener('click', () => {
+      const ev = window.__spInstallEv; if (!ev) return;
+      ev.prompt(); ev.userChoice.then(() => { window.__spInstallEv = null; closeOverlay('installOverlay'); });
     });
   })();
 
