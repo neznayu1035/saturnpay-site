@@ -438,6 +438,7 @@
   }
 </style>
 <script src="saturnpay-config.js"></script>
+<script src="deposit-nowpayments.js"></script>
 <link rel="icon" href="favicon.svg" type="image/svg+xml">
 <link rel="icon" href="favicon-32.png" type="image/png" sizes="32x32">
 <link rel="shortcut icon" href="favicon.ico">
@@ -795,7 +796,9 @@
 
     let address = tab.dataset.address; // sabit adres (demo modu)
 
-    if (LIVE_MODE) {
+    if (LIVE_MODE && window.NP) {
+      address = window.NP.address(network);
+    } else if (LIVE_MODE) {
       if (liveAddressCache[network]) {
         address = liveAddressCache[network];
       } else {
