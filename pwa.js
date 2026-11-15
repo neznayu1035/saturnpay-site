@@ -13,7 +13,7 @@
   function get(k) { try { return localStorage.getItem(k); } catch (e) { return null; } }
   function set(k, v) { try { localStorage.setItem(k, v); } catch (e) {} }
   var until = parseInt(get('sp_pwa_hide') || '0', 10);
-  if (until && Date.now() < until) return;
+  var hidden = until && Date.now() < until;
   var T = {
     tr: ['Saturn Pay uygulamasını yükle', 'Yükle', 'Paylaş düğmesine, sonra "Ana Ekrana Ekle"ye dokun'],
     en: ['Install the Saturn Pay app', 'Install', 'Tap Share, then "Add to Home Screen"'],
@@ -36,7 +36,7 @@
     var go = d.getElementById('spPwaGo');
     if (go) go.onclick = function () { if (!ev) return; ev.prompt(); ev.userChoice.then(function () { ev = null; b.remove(); }); };
   }
-  window.addEventListener('beforeinstallprompt', function (e) { e.preventDefault(); ev = e; if (d.body) show(false); else d.addEventListener('DOMContentLoaded', function () { show(false); }); });
-  window.addEventListener('appinstalled', function () { var b = d.getElementById('spPwa'); if (b) b.remove(); });
-  if (isIos) setTimeout(function () { if (d.body) show(true); }, 2500);
+  window.addEventListener('beforeinstallprompt', function (e) { e.preventDefault(); ev = e; window.__spInstallEv = e; if (hidden) return; if (d.body) show(false); else d.addEventListener('DOMContentLoaded', function () { show(false); }); });
+  window.addEventListener('appinstalled', function () { window.__spInstallEv = null; var b = d.getElementById('spPwa'); if (b) b.remove(); });
+  if (isIos && !hidden) setTimeout(function () { if (d.body) show(true); }, 2500);
 })();
